@@ -30,12 +30,31 @@ const MainContent = styled.div`
   flex-direction: column;
 `;
 
+const LoadingMessage = styled.div`
+  padding: 2rem;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #666;
+`;
+
+const ErrorMessage = styled.div`
+  padding: 2rem;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #d32f2f;
+  background-color: #ffebee;
+  border-radius: 4px;
+  border: 1px solid #ef5350;
+`;
+
 export const App = () => {
   const {
     filterState: { currentCategory, maxPrice },
     filteredBikesList,
     handleCurrentCategory,
     handleMaxPrice,
+    isLoading,
+    error,
   } = useFilter();
   const { shoppingCart, addBikeToCart, removeBikeFromCart } = useShoppingCart();
 
@@ -56,10 +75,16 @@ export const App = () => {
                   <PriceControl maxPrice={maxPrice} handleMaxPrice={handleMaxPrice} />
                 </Filter>
                 <MainContent>
-                  <BikesGrid
-                    filteredBikesList={filteredBikesList}
-                    addBikeToCart={addBikeToCart}
-                  />
+                  {isLoading ? (
+                    <LoadingMessage>Loading bikes...</LoadingMessage>
+                  ) : error ? (
+                    <ErrorMessage>Error loading bikes: {error}</ErrorMessage>
+                  ) : (
+                    <BikesGrid
+                      filteredBikesList={filteredBikesList}
+                      addBikeToCart={addBikeToCart}
+                    />
+                  )}
                 </MainContent>
               </AppContainer>
               <ShoppingCart

@@ -4,4 +4,5 @@ export interface BikeFromDatabase {
   price: number;
   link: string;
   image_url: string;
+  category?: string;
 }

@@ -29,7 +29,7 @@ const GridItem = memo(({ bike, addBikeToCart }: IGridItemProps) => {
   return (
     <StyledBikeCard key={bike.id}>
       <StyledBikeImage onClick={handleImageClick}>
-        <img src={`${IMG_PATH}${bike.imgSrc}`} alt={bike.name} />
+        <img src={`${bike.imgSrc}`} alt={bike.name} />
       </StyledBikeImage>
 
       <StyledBottomOfBikeCard>
