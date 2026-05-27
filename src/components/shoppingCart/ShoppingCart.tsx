@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { useNavigate } from "react-router-dom";
 import { IMG_PATH } from "../../common/constants";
 import { Bike } from "../../common/types";
 import {
@@ -44,9 +45,15 @@ const getOrderSum = (cart: Array<Bike>) =>
 
 export const ShoppingCart = memo(
   ({ shoppingCart, removeBikeFromCart }: IProps) => {
+    const navigate = useNavigate();
+
     if (!shoppingCart.length) {
       return null;
     }
+
+    const handleOrderClick = () => {
+      navigate("/comparison");
+    };
 
     return (
       // TODO: Divide code to components;
@@ -61,7 +68,7 @@ export const ShoppingCart = memo(
           ))}
         </StyledScrollingList>
 
-        <StyledOrderButton>
+        <StyledOrderButton onClick={handleOrderClick}>
           ORDER {getOrderSum(shoppingCart)}$
         </StyledOrderButton>
       </StyledShoppingCart>

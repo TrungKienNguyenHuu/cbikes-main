@@ -1,7 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { bikesList } from "../../data";
 import { IMG_PATH } from "../../common/constants";
 import styled from "styled-components";
+import { useEffect, useState } from "react";
+import { Bike } from "../../common/types";
+import { fetchBikeByIdFromAPI } from "../../services/bikeService";
+import { useShoppingCart } from "../../hooks/shoppingCart.hook";
+import { uuid } from "../../utils/uuid";
 
 const StyledDetailContainer = styled.div`
   padding: 2rem;
@@ -146,11 +150,75 @@ const StyledSellersGrid = styled.div`
   gap: 1rem;
 `;
 
+const StyledAddToCartButton = styled.button`
+  padding: 1rem 2rem;
+  background-color: #ff6b35;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  align-self: flex-start;
+
+  &:hover {
+    background-color: #ff5a1a;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+`;
+
 export const ProductDetail = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
+  const { addBikeToCart } = useShoppingCart();
+  
+  const [product, setProduct] = useState<Bike | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const product = bikesList.find((bike) => bike.id === productId);
+  useEffect(() => {
+    if (!productId) return;
+    
+    const loadProduct = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const bike = await fetchBikeByIdFromAPI(productId);
+        setProduct(bike);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to load product";
+        setError(errorMessage);
+        console.error("Error loading product:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProduct();
+  }, [productId]);
+
+  const handleAddToCart = () => {
+    if (product) {
+      addBikeToCart({ ...product, id: uuid() });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <StyledDetailContainer>
+        <StyledDetailHeader>
+          <StyledBackButton onClick={() => navigate("/")}>
+            ← Back to Products
+          </StyledBackButton>
+        </StyledDetailHeader>
+        <div>Loading product...</div>
+      </StyledDetailContainer>
+    );
+  }
 
   if (!product) {
     return (
@@ -160,7 +228,7 @@ export const ProductDetail = () => {
             ← Back to Products
           </StyledBackButton>
         </StyledDetailHeader>
-        <div>Product not found</div>
+        <div>Product not found: {error}</div>
       </StyledDetailContainer>
     );
   }
@@ -180,7 +248,7 @@ export const ProductDetail = () => {
 
       <StyledDetailGrid>
         <StyledImageSection>
-          <StyledImage src={`${IMG_PATH}${product.imgSrc}`} alt={product.name} />
+          <StyledImage src={`${product.imgSrc}`} alt={product.name} />
         </StyledImageSection>
 
         <StyledInfoSection>
@@ -188,6 +256,10 @@ export const ProductDetail = () => {
           <StyledPriceRange>
             Lowest Price: <strong>${lowestPrice}</strong>
           </StyledPriceRange>
+
+          <StyledAddToCartButton onClick={handleAddToCart}>
+            + Add to Cart
+          </StyledAddToCartButton>
 
           {product.specifications && (
             <div>

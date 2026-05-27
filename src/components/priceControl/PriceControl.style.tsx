@@ -1,16 +1,15 @@
 import styled from "styled-components";
+import { COLORS, BREAKPOINTS } from "../../common/constants";
 
 export const StyledPriceControlWrapper = styled.div`
   position: relative;
   display: flex;
-  height: 28.5px;
-  max-width: 375px;
-  min-width: 200px;
+  height: 40px;
   width: 100%;
   flex-grow: 1;
 
-  @media (max-width: 600px) {
-    max-width: 575px;
+  @media (max-width: ${BREAKPOINTS.tablet}) {
+    max-width: 100%;
   }
 `;
 
@@ -22,32 +21,51 @@ export const StyledCount = styled.span`
   pointer-events: none;
   color: white;
   mix-blend-mode: difference;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 600;
 `;
 
 export const StyledPriceControl = styled.input`
   -webkit-appearance: none;
   position: relative;
   overflow: hidden;
-  height: 28px;
+  height: 40px;
   width: 100%;
   cursor: pointer;
   border-radius: 20px;
+  background: ${COLORS.backgroundLight};
 
   ::-webkit-slider-runnable-track {
-    background: #e5e5ed;
+    background: ${COLORS.border};
+    height: 40px;
+    border-radius: 20px;
   }
+  
   ::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 0px;
-    height: 28px;
-    box-shadow: -400px 0 0 400px black;
-    border: 2px solid #000;
+    height: 40px;
+    box-shadow: -500px 0 0 500px ${COLORS.primary};
+    border: 2px solid ${COLORS.primary};
   }
+  
   ::-moz-range-track {
-    height: 28px;
-    background: #000;
+    height: 40px;
+    background: ${COLORS.border};
+    border-radius: 20px;
   }
+  
+  ::-moz-range-thumb {
+    background: ${COLORS.primary};
+    border: 2px solid ${COLORS.primary};
+    border-radius: 20px;
+    height: 40px;
+    cursor: pointer;
+  }
+
+  /* * NOTE: You have a duplicate ::-moz-range-thumb here. 
+   * The rules below will overwrite the ones above. 
+   */
   ::-moz-range-thumb {
     background: #000;
     height: 28px;

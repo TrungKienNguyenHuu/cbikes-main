@@ -21,7 +21,7 @@ router.get("/", async (req: Request, res: Response) => {
 router.get("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const query = "SELECT id, name, price, link, image_url, category FROM products WHERE id = id";
+    const query = "SELECT id, name, price, link, image_url, category FROM products WHERE id = $1";
     const result = await pool.query(query, [id]);
 
     if (result.rows.length === 0) {
@@ -42,7 +42,7 @@ router.get("/category/:category", async (req: Request, res: Response) => {
   try {
     const { category } = req.params;
     const query =
-      "SELECT id, name, price, link, image_url, category FROM products WHERE category = $1 ORDER BY id";
+      "SELECT id, name, price, link, image_url, category FROM products WHERE category = category ORDER BY id";
     const result = await pool.query(query, [category]);
     const bikes: BikeFromDatabase[] = result.rows;
     res.json(bikes);
