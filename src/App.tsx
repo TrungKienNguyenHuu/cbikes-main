@@ -16,6 +16,7 @@ import { ToastDisplay } from "./components/toast/ToastDisplay";
 import { HeroSection } from "./components/hero/HeroSection";
 import { Toolbar } from "./components/toolbar/Toolbar";
 import { Pagination } from "./components/pagination/Pagination";
+import { Footer } from "./components/footer/Footer";
 
 const AppContainer = styled.div`
   display: flex;
@@ -34,6 +35,16 @@ const MainContent = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+`;
+
+const PageLayout = styled.div`
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+`;
+
+const PageContent = styled.div`
+  flex: 1;
 `;
 
 const LoadingMessage = styled.div`
@@ -122,72 +133,105 @@ const AppContent = () => {
     <>
       <ToastDisplay />
       <Router basename="/cbikes">
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <>
-                <Header title={WEB_APP_NAME} cartCount={shoppingCart.length} />
-                <HeroSection />
-                <AppContainer>
-                  <Filter>
-                    <CategoryButtonsGroup
-                      currentCategory={currentCategory}
-                      handleCurrentCategory={handleCurrentCategory}
+        <PageLayout>
+          <PageContent>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <>
+                    <Header
+                      title={WEB_APP_NAME}
+                      cartCount={shoppingCart.length}
+                      searchTerm={searchTerm}
+                      onSearch={handleSearch}
                     />
-                    <PriceControl maxPrice={maxPrice} handleMaxPrice={handleMaxPrice} />
-                  </Filter>
-                  <MainContent>
-                    {isLoading ? (
-                      <LoadingMessage>Loading bikes...</LoadingMessage>
-                    ) : error ? (
-                      <ErrorMessage>Error loading bikes: {error}</ErrorMessage>
-                    ) : (
-                      <>
-                        <Toolbar
-                          sortType={sortType}
-                          onSortChange={handleSort}
-                          itemsPerPage={itemsPerPage}
-                          onItemsPerPageChange={handleItemsPerPage}
-                          totalResults={filteredBikesList.length}
-                          displayedResults={paginatedBikes.length}
+                    <HeroSection />
+                    <AppContainer>
+                      <Filter>
+                        <CategoryButtonsGroup
+                          currentCategory={currentCategory}
+                          handleCurrentCategory={handleCurrentCategory}
                         />
-                        {filteredBikesList.length === 0 ? (
-                          <EmptyState>
-                            <EmptyStateIcon>🚲</EmptyStateIcon>
-                            <EmptyStateText>No bikes found matching your filters</EmptyStateText>
-                            <ResetButton onClick={resetFilters}>Reset Filters</ResetButton>
-                          </EmptyState>
+                        <PriceControl maxPrice={maxPrice} handleMaxPrice={handleMaxPrice} />
+                      </Filter>
+                      <MainContent>
+                        {isLoading ? (
+                          <LoadingMessage>Loading bikes...</LoadingMessage>
+                        ) : error ? (
+                          <ErrorMessage>Error loading bikes: {error}</ErrorMessage>
                         ) : (
                           <>
-                            <BikesGrid
-                              filteredBikesList={paginatedBikes}
-                              addBikeToCart={addBikeToCart}
+                            <Toolbar
+                              sortType={sortType}
+                              onSortChange={handleSort}
+                              itemsPerPage={itemsPerPage}
+                              onItemsPerPageChange={handleItemsPerPage}
+                              totalResults={filteredBikesList.length}
+                              displayedResults={paginatedBikes.length}
                             />
-                            <Pagination
-                              currentPage={currentPage}
-                              totalPages={totalPages}
-                              onPageChange={setCurrentPage}
-                            />
+                            {filteredBikesList.length === 0 ? (
+                              <EmptyState>
+                                <EmptyStateIcon>🚲</EmptyStateIcon>
+                                <EmptyStateText>No bikes found matching your filters</EmptyStateText>
+                                <ResetButton onClick={resetFilters}>Reset Filters</ResetButton>
+                              </EmptyState>
+                            ) : (
+                              <>
+                                <BikesGrid
+                                  filteredBikesList={paginatedBikes}
+                                  addBikeToCart={addBikeToCart}
+                                />
+                                <Pagination
+                                  currentPage={currentPage}
+                                  totalPages={totalPages}
+                                  onPageChange={setCurrentPage}
+                                />
+                              </>
+                            )}
                           </>
                         )}
-                      </>
-                    )}
-                  </MainContent>
-                </AppContainer>
-                <ShoppingCart
-                  shoppingCart={shoppingCart}
-                  removeBikeFromCart={removeBikeFromCart}
-                />
-              </>
-            }
-          />
-          <Route path="/product/:productId" element={<ProductDetail />} />
-          <Route
-            path="/comparison"
-            element={<PriceComparison shoppingCart={shoppingCart} onBack={() => {}} />}
-          />
-        </Routes>
+                      </MainContent>
+                    </AppContainer>
+                    <ShoppingCart
+                      shoppingCart={shoppingCart}
+                      removeBikeFromCart={removeBikeFromCart}
+                    />
+                  </>
+                }
+              />
+              <Route
+                path="/product/:productId"
+                element={
+                  <>
+                    <Header
+                      title={WEB_APP_NAME}
+                      cartCount={shoppingCart.length}
+                      searchTerm={searchTerm}
+                      onSearch={handleSearch}
+                    />
+                    <ProductDetail />
+                  </>
+                }
+              />
+              <Route
+                path="/comparison"
+                element={
+                  <>
+                    <Header
+                      title={WEB_APP_NAME}
+                      cartCount={shoppingCart.length}
+                      searchTerm={searchTerm}
+                      onSearch={handleSearch}
+                    />
+                    <PriceComparison shoppingCart={shoppingCart} onBack={() => {}} />
+                  </>
+                }
+              />
+            </Routes>
+          </PageContent>
+          <Footer />
+        </PageLayout>
       </Router>
     </>
   );
