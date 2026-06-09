@@ -7,7 +7,8 @@ export const StyledBikesGrid = styled.div`
   gap: ${SPACING.lg};
   margin-top: ${SPACING.lg};
   flex: 1;
-
+    align-items: start;  
+    
   @media (max-width: ${BREAKPOINTS.tablet}) {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: ${SPACING.md};
@@ -43,6 +44,7 @@ export const StyledBikeCard = styled.div`
 `;
 
 export const StyledBikeImage = styled.div`
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -59,16 +61,54 @@ export const StyledBikeImage = styled.div`
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
-    transition: transform 0.3s ease;
-  }
-
-  &:hover img {
-    transform: scale(1.1);
+    transition: filter 0.3s ease, transform 0.3s ease;
   }
 
   @media (max-width: ${BREAKPOINTS.tablet}) {
     height: 140px;
     margin-bottom: ${SPACING.sm};
+  }
+`;
+
+export const StyledImageOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  background: rgba(255, 255, 255, 0.15);
+`;
+
+export const StyledFavoriteButton = styled.button<{ isFavorite: boolean }>`
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: ${({ isFavorite }) => (isFavorite ? COLORS.error : COLORS.background)};
+  color: ${({ isFavorite }) => (isFavorite ? "#fff" : COLORS.primary)};
+  font-size: 1.25rem;
+  cursor: pointer;
+  box-shadow: ${SHADOWS.md};
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  z-index: 2;
+
+  &:hover {
+    transform: scale(1.08);
+  }
+`;
+
+export const StyledBikeCardWithHover = styled(StyledBikeCard)`
+  &:hover ${StyledBikeImage} img {
+    filter: blur(4px);
+    transform: scale(1.02);
+  }
+
+  &:hover ${StyledImageOverlay} {
+    opacity: 1;
+    pointer-events: auto;
   }
 `;
 
@@ -131,5 +171,24 @@ export const StyledBottomOfBikeCard = styled.div`
       padding: 8px;
       font-size: 0.85rem;
     }
+  }
+`;
+
+export const StyledSellerCountBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #27ae60;
+  color: white;
+  padding: 0.25rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-top: ${SPACING.xs || "0.25rem"};
+  min-height: 1.2rem;
+  
+  @media (max-width: ${BREAKPOINTS.tablet}) {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
   }
 `;

@@ -7,6 +7,35 @@ interface BikeFromAPI {
   link: string;
   image_url: string;
   category?: string;
+  review_text?: string | null;
+}
+
+/**
+ * Interface for products from test backend
+ */
+interface ProductFromTestAPI {
+  product_id: string;
+  name: string;
+  url?: string;
+  image_url?: string;
+  description?: string;
+  brand?: string;
+  specifications?: Record<string, any>;
+  created_at: string;
+  listings: ProductListing[];
+}
+
+interface ProductListing {
+  listing_id: string;
+  product_id: string;
+  source_name: string;
+  listing_title: string;
+  price: number;
+  url?: string;
+  image_url?: string;
+  description?: string;
+  specifications?: Record<string, any>;
+  last_updated: string;
 }
 
 /**
@@ -29,17 +58,27 @@ const parsePrice = (price: number | string): number => {
   return isNaN(parsed) ? 0 : parsed;
 };
 
+const normalizeCategory = (raw?: string | null): keyof typeof Category => {
+  if (!raw) return Category.all;
+
+  const normalized = raw.trim().toLowerCase();
+  const categoryIds: Array<keyof typeof Category> = ["vinfast", "yaeda", "kazuki"];
+
+  if (categoryIds.includes(normalized as keyof typeof Category)) {
+    return normalized as keyof typeof Category;
+  }
+
+  console.warn(
+    `⚠️ Category "${raw}" not recognized for filtering, using "all"`
+  );
+  return Category.all;
+};
+
 /**
  * Transform backend API response to frontend Bike format
  */
 const transformBikeFromAPI = (apiBike: BikeFromAPI): Bike => {
-  // Map category from API response or default to 'all'
-  let category: keyof typeof Category = "all";
-  if (apiBike.category && apiBike.category in Category) {
-    category = apiBike.category as keyof typeof Category;
-  } else {
-    console.warn(`⚠️ Category "${apiBike.category}" not recognized for bike ${apiBike.id}, using "all"`);
-  }
+  const category = normalizeCategory(apiBike.category);
 
   const parsedPrice = parsePrice(apiBike.price);
 
@@ -49,6 +88,10 @@ const transformBikeFromAPI = (apiBike: BikeFromAPI): Bike => {
     price: parsedPrice,
     imgSrc: apiBike.image_url,
     category: category,
+    link: apiBike.link,
+    ...(apiBike.review_text != null && apiBike.review_text !== ""
+      ? { reviewText: apiBike.review_text }
+      : {}),
   };
   
   console.log(`📦 Transformed bike: ${apiBike.name}`, transformedBike);
@@ -57,49 +100,195 @@ const transformBikeFromAPI = (apiBike: BikeFromAPI): Bike => {
 };
 
 /**
+ * Keep one bike per product name, using the minimum price row.
+ * This handles duplicated product names scraped from multiple listings.
+ */
+const keepLowestPricePerName = (bikes: Bike[]): Bike[] => {
+  const bikesByName = new Map<string, Bike>();
+
+  bikes.forEach((bike) => {
+    const key = bike.name.trim().toLowerCase();
+    const existing = bikesByName.get(key);
+
+    if (!existing || bike.price < existing.price) {
+      bikesByName.set(key, bike);
+    }
+  });
+
+  return Array.from(bikesByName.values());
+};
+
+/**
  * Fetch all bikes from the backend API
+ * ❌ DEPRECATED: This function fetches from port 5000 (main backend)
+ * Use fetchBikesFromTestBackend() instead for port 5001 (test backend)
+ */
+// export const fetchBikesFromAPI = async (): Promise<Bike[]> => {
+//   try {
+//     const backendURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+//     console.log("📡 Fetching bikes from:", `${backendURL}/api/bikes`);
+//     const response = await fetch(`${backendURL}/api/bikes`);
+
+//     if (!response.ok) {
+//       throw new Error(`Failed to fetch bikes: ${response.statusText}`);
+//     }
+
+//     const bikes: BikeFromAPI[] = await response.json();
+//     console.log("📥 Raw API response:", bikes);
+//     
+//     // Transform API response to frontend format
+//     const transformedBikes: Bike[] = bikes.map(transformBikeFromAPI);
+//     const lowestPriceBikes = keepLowestPricePerName(transformedBikes);
+//     console.log("✅ Transformed bikes (lowest price per name):", lowestPriceBikes);
+
+//     return lowestPriceBikes;
+//   } catch (error) {
+//     console.error("❌ Error fetching bikes from API:", error);
+//     throw error;
+//   }
+// };
+
+/**
+ * Fetch a single bike by ID
+ * ❌ DEPRECATED: This function fetches from port 5000 (main backend)
+ * Use fetchBikeByIdFromTestBackend() instead for port 5001 (test backend)
+ */
+// export const fetchBikeByIdFromAPI = async (id: string): Promise<Bike> => {
+//   try {
+//     const backendURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+//     const response = await fetch(`${backendURL}/api/bikes/${id}`);
+
+//     if (!response.ok) {
+//       throw new Error(`Failed to fetch bike: ${response.statusText}`);
+//     }
+
+//     const bike: BikeFromAPI = await response.json();
+//     
+//     return transformBikeFromAPI(bike);
+//   } catch (error) {
+//     console.error(`Error fetching bike ${id} from API:`, error);
+//     throw error;
+//   }
+// };
+
+/**
+ * Transform product from test backend to Bike format
+ * Takes the first (lowest price) listing from a product
+ * Includes all listings as sellers
+ */
+const transformProductToBike = (product: ProductFromTestAPI): Bike | null => {
+  try {
+    if (!product.listings || product.listings.length === 0) {
+      console.warn(`⚠️ No listings found for product ${product.name}`);
+      return null;
+    }
+
+    // Get the lowest priced listing for this product
+    const lowestPriceListing = product.listings.reduce((lowest, current) => {
+      return current.price < lowest.price ? current : lowest;
+    });
+
+    // FIND THE LATEST TIMESTAMP ACROSS ALL LISTINGS
+    const latestUpdate = product.listings.reduce((latest, current) => {
+      if (!current.last_updated) return latest;
+      const currentUpdate = new Date(current.last_updated).getTime();
+      const latestTime = new Date(latest).getTime();
+      return currentUpdate > latestTime ? current.last_updated : latest;
+    }, product.listings[0]?.last_updated);
+
+    // Transform all listings to sellers format
+    const sellers = product.listings.map((listing) => {
+      const sellerUrl = listing.url || product.url || "";
+      console.log(`🏪 Seller: ${listing.source_name} | URL: ${sellerUrl} | Price: ${listing.price}`);
+      return {
+        name: listing.source_name,
+        price: listing.price,
+        url: sellerUrl,
+      };
+    });
+
+    const bike: Bike = {
+      id: product.product_id,
+      name: product.name,
+      price: lowestPriceListing.price,
+      imgSrc: product.image_url || lowestPriceListing.image_url || "", // Use product image or listing image
+      category: product.brand ? product.brand.toLowerCase() : "all",
+      link: product.url || lowestPriceListing.url || "",
+      reviewText: `Available at ${product.listings.length} store${product.listings.length > 1 ? "s" : ""}`,
+      sellers: sellers,
+      description: product.description,
+      specifications: product.specifications,
+      lastUpdated: latestUpdate,
+    };
+
+    console.log(`📦 Transformed product to bike with ${sellers.length} sellers:`, bike);
+    console.log(`📋 Sellers detail:`, sellers);
+    return bike;
+  } catch (error) {
+    console.error(`❌ Error transforming product ${product.name}:`, error);
+    return null;
+  }
+};
+
+/**
+ * Fetch all bikes from the test backend (port 5001)
+ * ✅ NEW: Fetches from test backend with product listings
  */
 export const fetchBikesFromAPI = async (): Promise<Bike[]> => {
   try {
-    const backendURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
-    console.log("📡 Fetching bikes from:", `${backendURL}/api/bikes`);
-    const response = await fetch(`${backendURL}/api/bikes`);
+    const testBackendURL = process.env.REACT_APP_TEST_BACKEND_URL || "http://localhost:5001";
+    console.log("📡 Fetching bikes from test backend:", `${testBackendURL}/api/products`);
+    
+    const response = await fetch(`${testBackendURL}/api/products`);
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch bikes: ${response.statusText}`);
+      throw new Error(`Failed to fetch products: ${response.statusText}`);
     }
 
-    const bikes: BikeFromAPI[] = await response.json();
-    console.log("📥 Raw API response:", bikes);
+    const products: ProductFromTestAPI[] = await response.json();
+    console.log("📥 Raw test backend response:", products);
     
-    // Transform API response to frontend format
-    const transformedBikes: Bike[] = bikes.map(transformBikeFromAPI);
-    console.log("✅ Transformed bikes:", transformedBikes);
+    // Transform products to bikes format
+    const transformedBikes: Bike[] = products
+      .map(transformProductToBike)
+      .filter((bike): bike is Bike => bike !== null);
     
-    return transformedBikes;
+    const lowestPriceBikes = keepLowestPricePerName(transformedBikes);
+    console.log("✅ Transformed products to bikes (lowest price per name):", lowestPriceBikes);
+
+    return lowestPriceBikes;
   } catch (error) {
-    console.error("❌ Error fetching bikes from API:", error);
+    console.error("❌ Error fetching bikes from test backend:", error);
     throw error;
   }
 };
 
 /**
- * Fetch a single bike by ID
+ * Fetch a single bike by ID from the test backend (port 5001)
+ * ✅ NEW: Fetches from test backend with product listings
  */
 export const fetchBikeByIdFromAPI = async (id: string): Promise<Bike> => {
   try {
-    const backendURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
-    const response = await fetch(`${backendURL}/api/bikes/${id}`);
+    const testBackendURL = process.env.REACT_APP_TEST_BACKEND_URL || "http://localhost:5001";
+    console.log("📡 Fetching bike by ID from test backend:", `${testBackendURL}/api/products/${id}`);
+    
+    const response = await fetch(`${testBackendURL}/api/products/${id}`);
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch bike: ${response.statusText}`);
+      throw new Error(`Failed to fetch product: ${response.statusText}`);
     }
 
-    const bike: BikeFromAPI = await response.json();
+    const product: ProductFromTestAPI = await response.json();
+    console.log("📥 Fetched product:", product);
     
-    return transformBikeFromAPI(bike);
+    const bike = transformProductToBike(product);
+    if (!bike) {
+      throw new Error(`Failed to transform product ${id} to bike format`);
+    }
+    
+    return bike;
   } catch (error) {
-    console.error(`Error fetching bike ${id} from API:`, error);
+    console.error(`❌ Error fetching bike ${id} from test backend:`, error);
     throw error;
   }
 };

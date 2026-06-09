@@ -16,21 +16,26 @@ export interface BikeSpecifications {
 export interface Bike {
   id: string;
   name: string;
-  category: keyof typeof Category;
+  category: string;
   price: number;
   imgSrc: string;
-  specifications?: BikeSpecifications;
+  link: string;
+  reviewText?: string;
+  specifications?: Record<string, any>;
+  description?: string;
   sellers?: Seller[];
+  lastUpdated?: string;
 }
 
 export enum Category {
   all = "all",
-  road = "road",
-  mountain = "mountain",
-  bmx = "bmx",
+  vinfast = "vinfast",
+  yaeda = "yaeda",
+  kazuki = "kazuki",
 }
 
 export interface FilterState {
   currentCategory: string;
   maxPrice: number;
+  currentSeller: string;
 }

@@ -8,10 +8,15 @@ export const useSearch = (bikes: Bike[], searchTerm: string) => {
     }
 
     const lowerSearch = searchTerm.toLowerCase();
-    return bikes.filter(
-      (bike) =>
-        bike.name.toLowerCase().includes(lowerSearch) ||
-        (bike.specifications?.motorPower.toLowerCase().includes(lowerSearch))
-    );
+    return bikes.filter((bike) => {
+      // Search by product name
+      const matchesName = bike.name.toLowerCase().includes(lowerSearch);
+      
+      // Also search by motor power specifications if available
+      const matchesMotorPower =
+        bike.specifications?.motorPower?.toLowerCase().includes(lowerSearch) ?? false;
+      
+      return matchesName || matchesMotorPower;
+    });
   }, [bikes, searchTerm]);
 };

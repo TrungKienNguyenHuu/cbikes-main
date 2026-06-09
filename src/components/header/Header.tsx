@@ -1,10 +1,14 @@
-import { memo } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { COLORS, SPACING, BREAKPOINTS, SHADOWS } from "../../common/constants";
+import { Bike } from "../../common/types";
+import { FavoritesDropdown } from "./FavoritesDropdown";
 
 interface IHeaderProps {
   title: string;
-  cartCount?: number;
+  favorites?: Bike[];
+  searchTerm?: string;
+  onSearch?: (term: string) => void;
 }
 
 const HeaderContainer = styled.header`
@@ -91,7 +95,11 @@ const SearchButton = styled.button`
   }
 `;
 
-const CartBadge = styled.div`
+const FavoritesWrapper = styled.div`
+  position: relative;
+`;
+
+const CartBadge = styled.button`
   position: relative;
   font-size: 1.5rem;
   cursor: pointer;
@@ -102,6 +110,7 @@ const CartBadge = styled.div`
   height: 40px;
   border-radius: 50%;
   background-color: ${COLORS.backgroundLight};
+  border: none;
   transition: background-color 0.3s ease;
 
   &:hover {
@@ -125,22 +134,59 @@ const BadgeCount = styled.span`
   font-weight: 700;
 `;
 
-export const Header = memo(({ title, cartCount = 0 }: IHeaderProps) => (
-  <HeaderContainer>
-    <HeaderContent>
-      <Logo>{title}</Logo>
-      <SearchContainer>
-        <SearchInput
-          type="text"
-          placeholder="Search bikes by name or specs..."
-          aria-label="Search bikes"
-        />
-        <SearchButton>Search</SearchButton>
-      </SearchContainer>
-      <CartBadge title="Shopping Cart">
-        🛒
-        {cartCount > 0 && <BadgeCount>{cartCount}</BadgeCount>}
-      </CartBadge>
-    </HeaderContent>
-  </HeaderContainer>
-));
+export const Header = memo(
+  ({ title, favorites = [], searchTerm = "", onSearch }: IHeaderProps) => {
+    const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+    const favoritesRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+      if (!isFavoritesOpen) return;
+
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          favoritesRef.current &&
+          !favoritesRef.current.contains(event.target as Node)
+        ) {
+          setIsFavoritesOpen(false);
+        }
+      };
+
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [isFavoritesOpen]);
+
+    return (
+      <HeaderContainer>
+        <HeaderContent>
+          <Logo>{title}</Logo>
+          <SearchContainer>
+            <SearchInput
+              type="text"
+              placeholder="Search bikes by name or specs..."
+              aria-label="Search bikes"
+              value={searchTerm}
+              onChange={(e) => onSearch?.(e.target.value)}
+            />
+            <SearchButton onClick={() => onSearch?.(searchTerm)}>Search</SearchButton>
+          </SearchContainer>
+          <FavoritesWrapper ref={favoritesRef}>
+            <CartBadge
+              type="button"
+              title="Favorite Products"
+              aria-label="Favorite products"
+              onClick={() => setIsFavoritesOpen((prev) => !prev)}
+            >
+              🛒
+              {favorites.length > 0 && <BadgeCount>{favorites.length}</BadgeCount>}
+            </CartBadge>
+            <FavoritesDropdown
+              favorites={favorites}
+              isOpen={isFavoritesOpen}
+              onClose={() => setIsFavoritesOpen(false)}
+            />
+          </FavoritesWrapper>
+        </HeaderContent>
+      </HeaderContainer>
+    );
+  }
+);

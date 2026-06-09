@@ -1,7 +1,8 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IMG_PATH } from "../../common/constants";
 import { Bike } from "../../common/types";
+import { useToast } from "../../context/ToastContext";
 import {
   StyledCartImg,
   StyledCartItem,
@@ -23,6 +24,15 @@ interface IShoppingItem {
 }
 
 const ShoppingItem = memo(({ bike, removeBikeFromCart }: IShoppingItem) => {
+  const [hasImageError, setHasImageError] = useState(false);
+  const imageSource =
+    bike.imgSrc.startsWith("http://") ||
+    bike.imgSrc.startsWith("https://") ||
+    bike.imgSrc.startsWith("data:") ||
+    bike.imgSrc.startsWith("/")
+      ? bike.imgSrc
+      : `${IMG_PATH}${bike.imgSrc}`;
+
   return (
     <StyledCartItem>
       <StyledTitle>
@@ -34,24 +44,30 @@ const ShoppingItem = memo(({ bike, removeBikeFromCart }: IShoppingItem) => {
       </StyledTitle>
 
       <StyledCartImg>
-        <img src={`${IMG_PATH}${bike.imgSrc}`} alt="" />
+        {hasImageError ? (
+          <span>Image unavailable</span>
+        ) : (
+          <img src={imageSource} alt={bike.name} onError={() => setHasImageError(true)} />
+        )}
       </StyledCartImg>
     </StyledCartItem>
   );
 });
 
-const getOrderSum = (cart: Array<Bike>) =>
-  cart.reduce((acc, el) => acc + el.price, 0);
-
 export const ShoppingCart = memo(
   ({ shoppingCart, removeBikeFromCart }: IProps) => {
     const navigate = useNavigate();
+    const { addToast } = useToast();
 
     if (!shoppingCart.length) {
       return null;
     }
 
-    const handleOrderClick = () => {
+    const handleCompareClick = () => {
+      if (shoppingCart.length < 2) {
+        addToast("Add at least 2 products to compare", "warning", 2200);
+        return;
+      }
       navigate("/comparison");
     };
 
@@ -68,9 +84,7 @@ export const ShoppingCart = memo(
           ))}
         </StyledScrollingList>
 
-        <StyledOrderButton onClick={handleOrderClick}>
-          ORDER {getOrderSum(shoppingCart)}$
-        </StyledOrderButton>
+        <StyledOrderButton onClick={handleCompareClick}>Compare</StyledOrderButton>
       </StyledShoppingCart>
     );
   }

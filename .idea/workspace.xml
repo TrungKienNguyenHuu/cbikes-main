@@ -5,20 +5,30 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="28e2b920-4343-40b7-8f21-0104008a97b4" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/backend-test/.env" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend-test/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend-test/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend-test/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/config/database.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/config/database.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/routes/bikes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/routes/bikes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/types/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/types/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/.env" beforeDir="false" afterPath="$PROJECT_DIR$/src/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/common/constants.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/constants.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common/styles.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/styles.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/types.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/bikesGrid/BikesGrid.style.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/bikesGrid/BikesGrid.style.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/categoryButtonsGroup/CategoryButtonsGroup.style.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/categoryButtonsGroup/CategoryButtonsGroup.style.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/filter/Filter.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/filter/Filter.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/bikesGrid/BikesGrid.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/bikesGrid/BikesGrid.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/categoryButtonsGroup/CategoryButtonsGroup.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/categoryButtonsGroup/CategoryButtonsGroup.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/header/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/header/Header.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/header/ProductDetail.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/header/ProductDetail.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/priceControl/PriceControl.style.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/priceControl/PriceControl.style.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/shoppingCart/ShoppingCart.style.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/shoppingCart/ShoppingCart.style.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/priceComparison/PriceComparison.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/priceComparison/PriceComparison.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/shoppingCart/ShoppingCart.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/shoppingCart/ShoppingCart.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hooks/filter.hook.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/filter.hook.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hooks/search.hook.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/search.hook.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hooks/shoppingCart.hook.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/shoppingCart.hook.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/bikeService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/bikeService.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,7 +89,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-WS-261.24374.125" />
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-WS-261.25134.101" />
       </set>
     </attachedChunks>
   </component>
@@ -106,6 +116,26 @@
       <workItem from="1779868810122" duration="500000" />
       <workItem from="1779887147849" duration="1061000" />
       <workItem from="1779889323751" duration="1072000" />
+      <workItem from="1779907131867" duration="228000" />
+      <workItem from="1779908766950" duration="7098000" />
+      <workItem from="1779921982047" duration="1365000" />
+      <workItem from="1779923909468" duration="108000" />
+      <workItem from="1779925782280" duration="614000" />
+      <workItem from="1779928062993" duration="2513000" />
+      <workItem from="1779938596244" duration="2105000" />
+      <workItem from="1780501054340" duration="1295000" />
+      <workItem from="1780503520894" duration="1447000" />
+      <workItem from="1780516012662" duration="1140000" />
+      <workItem from="1780529754057" duration="1906000" />
+      <workItem from="1780544780763" duration="733000" />
+      <workItem from="1780855823743" duration="702000" />
+      <workItem from="1780865615321" duration="3344000" />
+      <workItem from="1780910562555" duration="1558000" />
+      <workItem from="1780942204414" duration="568000" />
+      <workItem from="1780943317302" duration="1439000" />
+      <workItem from="1780951699261" duration="652000" />
+      <workItem from="1780996371304" duration="5362000" />
+      <workItem from="1781006103524" duration="1255000" />
     </task>
     <servers />
   </component>

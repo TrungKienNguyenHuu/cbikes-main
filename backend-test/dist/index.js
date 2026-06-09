@@ -1,0 +1,72 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const cors_1 = __importDefault(require("cors"));
+const dotenv_1 = __importDefault(require("dotenv"));
+const products_1 = __importDefault(require("./routes/products"));
+const listings_1 = __importDefault(require("./routes/listings"));
+const initDB_1 = require("./config/initDB");
+const database_1 = __importDefault(require("./config/database"));
+dotenv_1.default.config();
+const app = (0, express_1.default)();
+const PORT = process.env.PORT || 5001;
+// Middleware
+app.use((0, cors_1.default)());
+app.use(express_1.default.json());
+// Initialize database on startup
+app.use(async (req, res, next) => {
+    if (!app.locals.dbInitialized) {
+        try {
+            await (0, initDB_1.initializeDatabase)();
+            app.locals.dbInitialized = true;
+        }
+        catch (error) {
+            console.error("Failed to initialize database:", error);
+        }
+    }
+    next();
+});
+// Test database connection
+app.get("/health", async (req, res) => {
+    try {
+        const result = await database_1.default.query("SELECT NOW()");
+        res.json({
+            status: "OK",
+            database: "Connected",
+            port: PORT,
+            timestamp: result.rows[0],
+        });
+    }
+    catch (error) {
+        console.error("Database connection error:", error);
+        res.status(500).json({
+            status: "Error",
+            database: "Disconnected",
+        });
+    }
+});
+// Routes
+app.use("/api/products", products_1.default);
+app.use("/api/listings", listings_1.default);
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error("Unhandled error:", err);
+    res.status(500).json({ error: "Internal server error" });
+});
+// Start server
+app.listen(PORT, () => {
+    console.log(`✓ Test Backend Server running on http://localhost:${PORT}`);
+    console.log(`✓ Health check: http://localhost:${PORT}/health`);
+    console.log(`✓ Get all products: http://localhost:${PORT}/api/products`);
+    console.log(`✓ Get all listings: http://localhost:${PORT}/api/listings`);
+});
+// Graceful shutdown
+process.on("SIGINT", async () => {
+    console.log("Shutting down...");
+    await database_1.default.end();
+    process.exit(0);
+});
+//# sourceMappingURL=index.js.map

@@ -1,11 +1,56 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { IMG_PATH } from "../../common/constants";
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { Bike } from "../../common/types";
 import { fetchBikeByIdFromAPI } from "../../services/bikeService";
 import { useShoppingCart } from "../../hooks/shoppingCart.hook";
+import { getImageUrl, getPlaceholderImage } from "../../utils/imageLoader";
 import { uuid } from "../../utils/uuid";
+
+/**
+ * Unescape unicode escape sequences in JSON strings
+ * Converts \u003C to <, \u003E to >, etc.
+ */
+const unescapeUnicode = (text: string): string => {
+  return text.replace(/\\u([\dA-F]{4})/gi, (match, grp) => {
+    return String.fromCharCode(parseInt(grp, 16));
+  });
+};
+
+/**
+ * Check if text looks like HTML
+ */
+const isHtmlContent = (text: string): boolean => {
+  const unescaped = unescapeUnicode(text);
+  // Check if it contains HTML tags or encoded HTML patterns
+  return /<[^>]+>/g.test(unescaped) || /\\u003C/.test(text);
+};
+
+/**
+ * Extract clean HTML content from markdown wrapper
+ * Removes the outer markdown-main-panel div and extracts inner HTML
+ * Returns null if content is plain text
+ */
+const extractHtmlContent = (html: string): string | null => {
+  // First unescape unicode sequences
+  const unescaped = unescapeUnicode(html);
+  
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(unescaped, "text/html");
+  const markdownPanel = doc.querySelector(".markdown-main-panel");
+  
+  if (markdownPanel) {
+    return markdownPanel.innerHTML;
+  }
+  
+  // If no markdown panel, but it's HTML-like, return the unescaped HTML
+  if (/<[^>]+>/g.test(unescaped)) {
+    return unescaped;
+  }
+  
+  // Otherwise return null to indicate it's plain text
+  return null;
+};
 
 const StyledDetailContainer = styled.div`
   padding: 2rem;
@@ -36,6 +81,7 @@ const StyledDetailGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 3rem;
+  align-items: start;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
@@ -57,7 +103,14 @@ const StyledImage = styled.img`
 const StyledInfoSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
+  position: sticky;
+  top: 7rem;
+
+  @media (max-width: 768px) {
+    position: static;
+    top: auto;
+  }
 `;
 
 const StyledTitle = styled.h1`
@@ -76,78 +129,102 @@ const StyledPriceRange = styled.div`
   }
 `;
 
-const StyledSpecifications = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const StyledSpecItem = styled.div`
-  padding: 1rem;
-  background-color: #f8f8f8;
-  border-radius: 8px;
-  line-height: 1.6;
-`;
-
-const StyledSellersSection = styled.div`
-  border-top: 2px solid #eee;
-  padding-top: 2rem;
-`;
-
-const StyledSellerCard = styled.div`
-  padding: 1.5rem;
-  background-color: #f9f9f9;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  transition: box-shadow 0.3s ease;
-  
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-`;
-
-const StyledSellerHeader = styled.h3`
-  margin: 0 0 0.5rem 0;
-  font-size: 1.2rem;
-  color: #333;
-`;
-
-const StyledSellerPrice = styled.div`
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #e74c3c;
-  margin: 0.5rem 0;
-`;
-
-const StyledSellerLink = styled.a`
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  background-color: #27ae60;
-  color: white;
-  text-decoration: none;
-  border-radius: 6px;
-  margin-top: 0.5rem;
-  transition: background-color 0.3s ease;
-  
-  &:hover {
-    background-color: #229954;
-  }
-`;
-
-const StyledSpecTitle = styled.h2`
-  font-size: 1.5rem;
-  margin: 1.5rem 0 1rem 0;
-  color: #333;
-`;
-
-const StyledSellersGrid = styled.div`
+// Updated: Removed the grid columns since the spec section was moved out
+const StyledInfoTop = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+`;
+
+const StyledPricingCard = styled.div`
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 1rem;
+`;
+
+// Updated: Added margin-top to separate from the top grid layout
+const StyledSpecTableWrapper = styled.div`
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+`;
+
+const StyledSpecTitle = styled.h2`
+  font-size: 1.3rem;
+  margin: 0 0 1.2rem 0;
+  color: #333;
+`;
+
+// Updated: Changed from a table to a horizontal grid to better utilize full width
+const StyledSpecGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+`;
+
+const StyledSpecItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  border-bottom: 1px solid #e7e7e7;
+  padding-bottom: 0.5rem;
+`;
+
+const StyledSpecRowLabel = styled.span`
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 600;
+  text-transform: uppercase;
+`;
+
+const StyledSpecRowValue = styled.span`
+  font-size: 1.05rem;
+  color: #222;
+`;
+
+const StyledDescriptionSection = styled.section`
+  margin-top: 2rem;
+  padding: 1.25rem;
+  background-color: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  line-height: 1.8;
+  color: #444;
+
+  /* HTML content styles */
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 1rem 0;
+    display: block;
+  }
+
+  p {
+    margin: 1rem 0;
+    line-height: 1.8;
+  }
+
+  ul, ol {
+    margin: 1rem 0 1rem 2rem;
+    line-height: 1.8;
+  }
+
+  li {
+    margin: 0.5rem 0;
+  }
+
+  strong {
+    font-weight: 700;
+    color: #333;
+  }
+
+  br {
+    line-height: 1.5;
+  }
 `;
 
 const StyledAddToCartButton = styled.button`
@@ -171,6 +248,84 @@ const StyledAddToCartButton = styled.button`
   }
 `;
 
+const StyledStoreCountBadge = styled.div`
+  display: inline-block;
+  background-color: #27ae60;
+  color: white;
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-top: 0.75rem;
+`;
+
+const StyledStoreCountContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.75rem;
+`;
+
+const StyledLastUpdatedText = styled.span`
+  font-size: 0.75rem;
+  color: #999;
+  font-style: italic;
+`;
+
+const StyledActualSellersSection = styled.div`
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: #f0f8f4;
+  border: 1px solid #d4edda;
+  border-radius: 8px;
+`;
+
+const StyledActualSellersTitle = styled.div`
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #27ae60;
+  margin-bottom: 0.5rem;
+`;
+
+const StyledActualSellersList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const StyledActualSellerItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background-color: white;
+  border: 1px solid #d4edda;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: #e8f5e9;
+    border-color: #27ae60;
+    box-shadow: 0 2px 4px rgba(39, 174, 96, 0.2);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+`;
+
+const StyledActualSellerName = styled.span`
+  font-weight: 600;
+  color: #333;
+`;
+
+const StyledActualSellerPrice = styled.span`
+  color: #e74c3c;
+  font-weight: 700;
+`;
+
 export const ProductDetail = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
@@ -179,6 +334,8 @@ export const ProductDetail = () => {
   const [product, setProduct] = useState<Bike | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState(false);
+  
 
   useEffect(() => {
     if (!productId) return;
@@ -187,6 +344,7 @@ export const ProductDetail = () => {
       try {
         setIsLoading(true);
         setError(null);
+        setImageError(false);
         const bike = await fetchBikeByIdFromAPI(productId);
         setProduct(bike);
       } catch (err) {
@@ -205,6 +363,10 @@ export const ProductDetail = () => {
     if (product) {
       addBikeToCart({ ...product, id: uuid() });
     }
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
   };
 
   if (isLoading) {
@@ -238,6 +400,8 @@ export const ProductDetail = () => {
       ? Math.min(...product.sellers.map((s) => s.price))
       : product.price;
 
+  const imageSrc = getImageUrl(product.imgSrc);
+  
   return (
     <StyledDetailContainer>
       <StyledDetailHeader>
@@ -248,67 +412,108 @@ export const ProductDetail = () => {
 
       <StyledDetailGrid>
         <StyledImageSection>
-          <StyledImage src={`${product.imgSrc}`} alt={product.name} />
+          <StyledImage 
+            src={imageError ? getPlaceholderImage() : imageSrc} 
+            alt={product.name}
+            onError={handleImageError}
+          />
         </StyledImageSection>
 
         <StyledInfoSection>
           <StyledTitle>{product.name}</StyledTitle>
-          <StyledPriceRange>
-            Lowest Price: <strong>${lowestPrice}</strong>
-          </StyledPriceRange>
+          <StyledInfoTop>
+            <StyledPricingCard>
+              <StyledPriceRange>
+                Lowest Price: <strong>${lowestPrice}</strong>
+              </StyledPriceRange>
+              
+              <StyledAddToCartButton onClick={handleAddToCart}>
+                Add to Compare
+              </StyledAddToCartButton>
 
-          <StyledAddToCartButton onClick={handleAddToCart}>
-            + Add to Cart
-          </StyledAddToCartButton>
-
-          {product.specifications && (
-            <div>
-              <StyledSpecTitle>Specifications</StyledSpecTitle>
-              <StyledSpecifications>
-                <StyledSpecItem>
-                  <strong>Battery Capacity:</strong> {product.specifications.batteryCapacity}
-                </StyledSpecItem>
-                <StyledSpecItem>
-                  <strong>Motor Power:</strong> {product.specifications.motorPower}
-                </StyledSpecItem>
-                <StyledSpecItem>
-                  <strong>Max Speed:</strong> {product.specifications.maxSpeed}
-                </StyledSpecItem>
-                <StyledSpecItem>
-                  <strong>Range:</strong> {product.specifications.range}
-                </StyledSpecItem>
-                <StyledSpecItem>
-                  <strong>Weight:</strong> {product.specifications.weight}
-                </StyledSpecItem>
-                <StyledSpecItem>
-                  <strong>Charging Time:</strong> {product.specifications.chargingTime}
-                </StyledSpecItem>
-              </StyledSpecifications>
-            </div>
-          )}
-
-          {product.sellers && product.sellers.length > 0 && (
-            <StyledSellersSection>
-              <StyledSpecTitle>Available at Sellers</StyledSpecTitle>
-              <StyledSellersGrid>
-                {product.sellers.map((seller, idx) => (
-                  <StyledSellerCard key={idx}>
-                    <StyledSellerHeader>{seller.name}</StyledSellerHeader>
-                    <StyledSellerPrice>${seller.price}</StyledSellerPrice>
-                    <StyledSellerLink
-                      href={seller.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      View on {seller.name} →
-                    </StyledSellerLink>
-                  </StyledSellerCard>
-                ))}
-              </StyledSellersGrid>
-            </StyledSellersSection>
-          )}
+              {product.sellers && product.sellers.length > 0 && (
+                <>
+                  <StyledStoreCountContainer>
+                    <StyledStoreCountBadge>
+                      {product.sellers.length} Store{product.sellers.length > 1 ? "s" : ""} Available
+                    </StyledStoreCountBadge>
+                    {product.lastUpdated && (
+                      <StyledLastUpdatedText>
+                        Last updated: {new Date(product.lastUpdated).toLocaleString()}
+                      </StyledLastUpdatedText>
+                    )}
+                  </StyledStoreCountContainer>
+                  
+                  <StyledActualSellersSection>
+                    <StyledActualSellersTitle>
+                      Available at:
+                    </StyledActualSellersTitle>
+                    <StyledActualSellersList>
+                      {product.sellers.map((seller, idx) => (
+                        <StyledActualSellerItem 
+                          key={idx}
+                          onClick={() => {
+                            console.log(`🔗 Clicked seller: ${seller.name} | URL: ${seller.url}`);
+                            if (seller.url) {
+                              window.open(seller.url, "_blank");
+                            }
+                          }}
+                        >
+                          <StyledActualSellerName>{seller.name}</StyledActualSellerName>
+                          <StyledActualSellerPrice>${seller.price}</StyledActualSellerPrice>
+                        </StyledActualSellerItem>
+                      ))}
+                    </StyledActualSellersList>
+                  </StyledActualSellersSection>
+                </>
+              )}
+            </StyledPricingCard>
+          </StyledInfoTop>
         </StyledInfoSection>
       </StyledDetailGrid>
+
+      {/* Moved Specifications section here to act as a horizontal bridge */}
+      <StyledSpecTableWrapper>
+        <StyledSpecTitle>Specifications</StyledSpecTitle>
+        {product.specifications && Object.keys(product.specifications).length > 0 ? (
+          <StyledSpecGrid>
+            {Object.entries(product.specifications).map(([key, value], idx) => (
+              <StyledSpecItem key={idx}>
+                <StyledSpecRowLabel>
+                  {key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, " ")}
+                </StyledSpecRowLabel>
+                <StyledSpecRowValue>
+                  {typeof value === "object" ? JSON.stringify(value) : String(value)}
+                </StyledSpecRowValue>
+              </StyledSpecItem>
+            ))}
+          </StyledSpecGrid>
+        ) : (
+          <p>No specifications available for this product.</p>
+        )}
+      </StyledSpecTableWrapper>
+
+      <StyledDescriptionSection>
+        <StyledSpecTitle>Product Description</StyledSpecTitle>
+        {product.description ? (
+          (() => {
+            const htmlContent = extractHtmlContent(product.description);
+            if (htmlContent) {
+              return (
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: htmlContent,
+                  }}
+                />
+              );
+            } else {
+              return <p>{product.description}</p>;
+            }
+          })()
+        ) : (
+          <p>No product description available for this listing.</p>
+        )}
+      </StyledDescriptionSection>
     </StyledDetailContainer>
   );
 };

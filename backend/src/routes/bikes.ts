@@ -17,11 +17,28 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
-// GET bike by ID
+// GET bike by ID (includes latest review as product description)
 router.get("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const query = "SELECT id, name, price, link, image_url, category FROM products WHERE id = $1";
+    const query = `
+      SELECT
+        p.id,
+        p.name,
+        p.price,
+        p.link,
+        p.image_url,
+        p.category,
+        (
+          SELECT r.review_text
+          FROM reviews r
+          WHERE r.listing_id = p.id
+          ORDER BY r.scraped_at DESC
+          LIMIT 1
+        ) AS review_text
+      FROM products p
+      WHERE p.id = $1
+    `;
     const result = await pool.query(query, [id]);
 
     if (result.rows.length === 0) {

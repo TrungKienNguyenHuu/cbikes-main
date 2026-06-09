@@ -7,9 +7,11 @@ import { CategoryButtonsGroup } from "./components/categoryButtonsGroup/Category
 import { PriceControl } from "./components/priceControl/PriceControl";
 import { ShoppingCart } from "./components/shoppingCart/ShoppingCart";
 import { ProductDetail } from "./components/header/ProductDetail";
+import { ProductDetailCopy } from "./components/header/ProductDetail_copy";
 import { PriceComparison } from "./components/priceComparison/PriceComparison";
 import { useFilter } from "./hooks/filter.hook";
 import { useShoppingCart } from "./hooks/shoppingCart.hook";
+import { useFavorites } from "./hooks/favorites.hook";
 import { WEB_APP_NAME, COLORS, SPACING, BREAKPOINTS } from "./common/constants";
 import { ToastProvider } from "./context/ToastContext";
 import { ToastDisplay } from "./components/toast/ToastDisplay";
@@ -109,11 +111,12 @@ export const App = () => {
 
 const AppContent = () => {
   const {
-    filterState: { currentCategory, maxPrice },
+    filterState: { currentCategory, maxPrice, currentSeller },
     filteredBikesList,
     paginatedBikes,
     handleCurrentCategory,
     handleMaxPrice,
+    handleCurrentSeller,
     isLoading,
     error,
     searchTerm,
@@ -126,8 +129,11 @@ const AppContent = () => {
     setCurrentPage,
     totalPages,
     resetFilters,
+    dynamicCategories,
+    dynamicSellers,
   } = useFilter();
   const { shoppingCart, addBikeToCart, removeBikeFromCart } = useShoppingCart();
+  const { favorites, isFavorite, toggleFavorite } = useFavorites();
 
   return (
     <>
@@ -142,7 +148,7 @@ const AppContent = () => {
                   <>
                     <Header
                       title={WEB_APP_NAME}
-                      cartCount={shoppingCart.length}
+                      favorites={favorites}
                       searchTerm={searchTerm}
                       onSearch={handleSearch}
                     />
@@ -150,9 +156,18 @@ const AppContent = () => {
                     <AppContainer>
                       <Filter>
                         <CategoryButtonsGroup
+                          categories={dynamicCategories}
                           currentCategory={currentCategory}
                           handleCurrentCategory={handleCurrentCategory}
                         />
+                        <div style={{ marginTop: "20px" }}>
+                          <h4 style={{ margin: "0 0 10px 0" }}>Store</h4>
+                          <CategoryButtonsGroup
+                              categories={dynamicSellers}
+                              currentCategory={currentSeller}
+                              handleCurrentCategory={handleCurrentSeller}
+                          />
+                        </div>
                         <PriceControl maxPrice={maxPrice} handleMaxPrice={handleMaxPrice} />
                       </Filter>
                       <MainContent>
@@ -181,6 +196,8 @@ const AppContent = () => {
                                 <BikesGrid
                                   filteredBikesList={paginatedBikes}
                                   addBikeToCart={addBikeToCart}
+                                  isFavorite={isFavorite}
+                                  onToggleFavorite={toggleFavorite}
                                 />
                                 <Pagination
                                   currentPage={currentPage}
@@ -206,11 +223,25 @@ const AppContent = () => {
                   <>
                     <Header
                       title={WEB_APP_NAME}
-                      cartCount={shoppingCart.length}
+                      favorites={favorites}
                       searchTerm={searchTerm}
                       onSearch={handleSearch}
                     />
                     <ProductDetail />
+                  </>
+                }
+              />
+              <Route
+                path="/test/product/:productId"
+                element={
+                  <>
+                    <Header
+                      title={WEB_APP_NAME}
+                      favorites={favorites}
+                      searchTerm={searchTerm}
+                      onSearch={handleSearch}
+                    />
+                    <ProductDetailCopy />
                   </>
                 }
               />
@@ -220,7 +251,7 @@ const AppContent = () => {
                   <>
                     <Header
                       title={WEB_APP_NAME}
-                      cartCount={shoppingCart.length}
+                      favorites={favorites}
                       searchTerm={searchTerm}
                       onSearch={handleSearch}
                     />

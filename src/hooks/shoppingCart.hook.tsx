@@ -15,7 +15,7 @@ export const useShoppingCart = () => {
         return;
       }
       setShoppingCart((prevBikes) => [...prevBikes, bike]);
-      addToast(`${bike.name} added to cart!`, "success", 2000);
+      addToast(`${bike.name} added to compare`, "success", 2000);
     },
     [shoppingCart, addToast]
   );
@@ -27,7 +27,7 @@ export const useShoppingCart = () => {
         prevBikes.filter((bike) => bike.id !== deleteId)
       );
       if (bikeToRemove) {
-        addToast(`${bikeToRemove.name} removed from cart`, "info", 2000);
+        addToast(`${bikeToRemove.name} removed from compare`, "info", 2000);
       }
     },
     [shoppingCart, addToast]

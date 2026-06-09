@@ -5,4 +5,5 @@ export interface BikeFromDatabase {
   link: string;
   image_url: string;
   category?: string;
+  review_text?: string | null;
 }

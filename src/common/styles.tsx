@@ -29,8 +29,9 @@ h3 {
 }
 
 #root {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 32px 200px 32px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
 }
 `;
