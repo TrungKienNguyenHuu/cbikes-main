@@ -3,7 +3,7 @@
   "installCommand": "npm install && cd backend && npm install",
   "outputDirectory": "build",
   "env": {
-    "DATABASE_URL": "@database_url",
+    "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/ecommerce_db",
     "NODE_ENV": "production"
   },
   "rewrites": [
