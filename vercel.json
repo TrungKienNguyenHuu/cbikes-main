@@ -2,7 +2,6 @@
   "version": 2,
   "buildCommand": "npm run build",
   "installCommand": "npm install && cd backend && npm install",
-  "framework": "react",
   "env": {
     "DATABASE_URL": "@database_url",
     "NODE_ENV": "production"
