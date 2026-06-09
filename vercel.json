@@ -1,0 +1,50 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "installCommand": "npm install && cd backend && npm install",
+  "framework": "react",
+  "env": {
+    "DATABASE_URL": "@database_url",
+    "NODE_ENV": "production"
+  },
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    },
+    {
+      "src": "backend/package.json",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": "backend/dist/**",
+        "excludeFiles": "backend/node_modules/**"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "backend/dist/index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "build/index.html",
+      "status": 200
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
+  ],
+  "functions": {
+    "backend/dist/index.js": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  }
+}
