@@ -1,49 +1,27 @@
 {
-  "version": 2,
   "buildCommand": "npm run build",
   "installCommand": "npm install && cd backend && npm install",
+  "outputDirectory": "build",
   "env": {
     "DATABASE_URL": "@database_url",
     "NODE_ENV": "production"
   },
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "build"
-      }
-    },
-    {
-      "src": "backend/package.json",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": "backend/dist/**",
-        "excludeFiles": "backend/node_modules/**"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "backend/dist/index.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "build/index.html",
-      "status": 200
-    }
-  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "destination": "/backend/dist/index.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "functions": {
     "backend/dist/index.js": {
       "memory": 1024,
-      "maxDuration": 30
+      "maxDuration": 30,
+      "includeFiles": "backend/dist/**",
+      "excludeFiles": "backend/node_modules/**"
     }
   }
 }
