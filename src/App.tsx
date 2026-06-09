@@ -4,6 +4,7 @@ import { Header } from "./components/header/Header";
 import { Filter } from "./components/filter/Filter";
 import { BikesGrid } from "./components/bikesGrid/BikesGrid";
 import { CategoryButtonsGroup } from "./components/categoryButtonsGroup/CategoryButtonsGroup";
+import { BrandFilterDropdown } from "./components/filter/BrandFilterDropdown";
 import { PriceControl } from "./components/priceControl/PriceControl";
 import { ShoppingCart } from "./components/shoppingCart/ShoppingCart";
 import { ProductDetail } from "./components/header/ProductDetail";
@@ -155,11 +156,15 @@ const AppContent = () => {
                     <HeroSection />
                     <AppContainer>
                       <Filter>
-                        <CategoryButtonsGroup
-                          categories={dynamicCategories}
-                          currentCategory={currentCategory}
-                          handleCurrentCategory={handleCurrentCategory}
-                        />
+                        <div>
+                          <h4 style={{ margin: "0 0 10px 0" }}>Brand</h4>
+                          <BrandFilterDropdown
+                            items={dynamicCategories}
+                            currentValue={currentCategory}
+                            onChange={handleCurrentCategory}
+                            placeholder="Select a brand"
+                          />
+                        </div>
                         <div style={{ marginTop: "20px" }}>
                           <h4 style={{ margin: "0 0 10px 0" }}>Store</h4>
                           <CategoryButtonsGroup
