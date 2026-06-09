@@ -5,30 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="28e2b920-4343-40b7-8f21-0104008a97b4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/backend-test/.env" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend-test/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend-test/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend-test/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/config/database.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/config/database.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/routes/bikes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/routes/bikes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/types/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/types/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/.env" beforeDir="false" afterPath="$PROJECT_DIR$/src/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/constants.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/constants.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/styles.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/styles.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/bikesGrid/BikesGrid.style.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/bikesGrid/BikesGrid.style.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/bikesGrid/BikesGrid.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/bikesGrid/BikesGrid.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/categoryButtonsGroup/CategoryButtonsGroup.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/categoryButtonsGroup/CategoryButtonsGroup.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/header/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/header/Header.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/header/ProductDetail.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/header/ProductDetail.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/priceComparison/PriceComparison.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/priceComparison/PriceComparison.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/shoppingCart/ShoppingCart.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/shoppingCart/ShoppingCart.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hooks/filter.hook.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/filter.hook.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hooks/search.hook.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/search.hook.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hooks/shoppingCart.hook.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/shoppingCart.hook.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/bikeService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/bikeService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/package-lock.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/config/database.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/index.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/routes/bikes.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/types/index.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/tsconfig.json" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -136,6 +121,7 @@
       <workItem from="1780951699261" duration="652000" />
       <workItem from="1780996371304" duration="5362000" />
       <workItem from="1781006103524" duration="1255000" />
+      <workItem from="1781020847883" duration="3745000" />
     </task>
     <servers />
   </component>

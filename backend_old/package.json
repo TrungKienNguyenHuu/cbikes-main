@@ -1,7 +1,7 @@
 {
-  "name": "cbikes-backend-test",
+  "name": "cbikes-backend",
   "version": "1.0.0",
-  "description": "Test Backend API for CBikes app with PostgreSQL database",
+  "description": "Backend API for CBikes app with PostgreSQL database",
   "main": "index.ts",
   "scripts": {
     "start": "node dist/index.js",
@@ -13,8 +13,7 @@
     "express": "^4.18.2",
     "pg": "^8.11.1",
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "uuid": "^9.0.0"
+    "dotenv": "^16.3.1"
   },
   "devDependencies": {
     "@types/express": "^4.17.17",
@@ -22,7 +21,6 @@
     "@types/pg": "^8.11.1",
     "typescript": "^5.1.3",
     "ts-node": "^10.9.1",
-    "@types/cors": "^2.8.13",
-    "@types/uuid": "^9.0.2"
+    "@types/cors": "^2.8.13"
   }
 }

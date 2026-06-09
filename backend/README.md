@@ -1,57 +1,63 @@
-# CBikes Backend API
+# Test Backend for CBikes
 
-This is the backend API for the CBikes application, powered by Express.js and PostgreSQL.
+This is a test backend API for the CBikes application with a PostgreSQL database containing product and product listing information.
 
-## Setup Instructions
+## Features
 
-### 1. Install Dependencies
+- Product management with listings from multiple sources
+- PostgreSQL database with normalized schema
+- RESTful API endpoints
+- Database seeding with sample data
+- TypeScript support
+
+## Setup
+
+### Installation
 
 ```bash
-cd backend
+cd backend-test
 npm install
 ```
 
-### 2. Configure Database
+### Environment Configuration
 
-Create a `.env` file in the backend folder with your PostgreSQL connection string:
+Create a `.env` file based on `.env.example`:
 
-```
-DATABASE_URL=postgresql://username:password@localhost:5432/cbikes_db
-PORT=5000
+```env
+PORT=5001
+DATABASE_URL=postgresql://user:password@localhost:5432/cbikes_test_db
 NODE_ENV=development
 ```
 
-### 3. Create Database Schema
+### Database Setup
 
-Before running the backend, create the `bikes` table in your PostgreSQL database:
+Make sure PostgreSQL is running and create the test database:
 
-```sql
-CREATE TABLE bikes (
-  id VARCHAR(50) PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  price DECIMAL(10, 2) NOT NULL,
-  link VARCHAR(500),
-  image_url VARCHAR(500),
-  category VARCHAR(50),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Insert sample data
-INSERT INTO bikes (id, name, price, link, image_url, category) VALUES
-('cano_one', 'Cano One', 2850, 'https://amazon.com', 'im1-min.png', 'road'),
-('predator', 'Predator', 1620, 'https://ebay.com', 'im12-min.png', 'bmx'),
-('canyon', 'Canyon', 780, 'https://store.com', 'im2-min.png', 'mountain');
+```bash
+psql -U postgres
+CREATE DATABASE cbikes_test_db;
 ```
 
-### 4. Build and Run
+### Seeding Test Data
 
-**Development mode** (with auto-reload):
+Run the seed script to populate the database with sample products and listings:
+
+```bash
+npm run seed
+```
+
+## Running the Server
+
+### Development
+
 ```bash
 npm run dev
 ```
 
-**Production mode** (compiled):
+The server will start on `http://localhost:5001`
+
+### Production Build
+
 ```bash
 npm run build
 npm start
@@ -59,73 +65,43 @@ npm start
 
 ## API Endpoints
 
-### Get All Bikes
-```
-GET /api/bikes
-```
-
-Response:
-```json
-[
-  {
-    "id": "cano_one",
-    "name": "Cano One",
-    "price": 2850,
-    "link": "https://amazon.com",
-    "image_url": "im1-min.png"
-  }
-]
-```
-
-### Get Bike by ID
-```
-GET /api/bikes/:id
-```
-
-Example: `GET /api/bikes/cano_one`
-
-### Get Bikes by Category
-```
-GET /api/bikes/category/:category
-```
-
-Example: `GET /api/bikes/category/road`
-
 ### Health Check
-```
-GET /health
-```
+- **GET** `/health` - Check server and database connection status
 
-## Frontend Integration
+### Products
+- **GET** `/api/products` - Get all products with their listings
+- **GET** `/api/products/:productId` - Get a specific product with its listings
 
-To use this backend in your React app, update your API calls to fetch from this server:
+### Listings
+- **GET** `/api/listings` - Get all product listings
+- **GET** `/api/listings/product/:productId` - Get listings for a specific product
 
-```typescript
-// Replace local data.ts imports with API calls
-const response = await fetch('http://localhost:5000/api/bikes');
-const bikes = await response.json();
-```
+## Database Schema
 
-## Project Structure
-
-```
-backend/
-├── src/
-│   ├── config/
-│   │   └── database.ts      # PostgreSQL connection
-│   ├── routes/
-│   │   └── bikes.ts         # Bike API routes
-│   ├── types/
-│   │   └── index.ts         # TypeScript interfaces
-│   └── index.ts             # Main server file
-├── package.json
-├── tsconfig.json
-├── .env.example
-└── README.md
+### Products Table
+```sql
+CREATE TABLE products (
+  product_id UUID PRIMARY KEY,
+  name VARCHAR(255) UNIQUE NOT NULL,
+  brand VARCHAR(100),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
-## Environment Variables
+### Product Listings Table
+```sql
+CREATE TABLE product_listings (
+  listing_id UUID PRIMARY KEY,
+  product_id UUID REFERENCES products(product_id) ON DELETE CASCADE,
+  source_name VARCHAR(50) NOT NULL,
+  listing_title TEXT NOT NULL,
+  price INTEGER NOT NULL,
+  currency VARCHAR(10) DEFAULT 'VND',
+  last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(product_id, source_name, listing_title)
+);
+```
 
-- `DATABASE_URL`: PostgreSQL connection string
-- `PORT`: Server port (default: 5000)
-- `NODE_ENV`: Environment (development/production)
+## Sample Data
+
+The seed script creates 5 sample products with 3-5 listings each from different sources (Phoxedien, WheelHub, RideZone, BikeHub, CycleMart) with realistic pricing in Vietnamese Dong (VND).
