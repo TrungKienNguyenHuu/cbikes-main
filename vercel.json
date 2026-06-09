@@ -9,19 +9,11 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/backend/dist/index.js"
+      "destination": "/api"
     },
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ],
-  "functions": {
-    "backend/dist/index.js": {
-      "memory": 1024,
-      "maxDuration": 30,
-      "includeFiles": "backend/dist/**",
-      "excludeFiles": "backend/node_modules/**"
-    }
-  }
+  ]
 }
