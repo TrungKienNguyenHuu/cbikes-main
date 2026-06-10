@@ -15,8 +15,10 @@ const PORT = process.env.PORT || 5001;
 // Middleware
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
-app.get("/", (req, res) => {
-    res.json({ message: "Express app loaded" });
+app.use((req, res, next) => {
+    console.log("PATH:", req.path);
+    console.log("URL:", req.url);
+    next();
 });
 // Test database connection
 app.get("/health", async (req, res) => {
@@ -40,6 +42,14 @@ app.get("/health", async (req, res) => {
 // Routes
 app.use("/products", products_1.default);
 app.use("/listings", listings_1.default);
+app.get("*", (req, res) => {
+    res.json({
+        message: "Catch-all route reached",
+        path: req.path,
+        url: req.url,
+        originalUrl: req.originalUrl
+    });
+});
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error("Unhandled error:", err);

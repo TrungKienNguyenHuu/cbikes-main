@@ -16,6 +16,7 @@ app.use(express.json());
 
 app.use((req, res, next) => {
   console.log("PATH:", req.path);
+  console.log("URL:", req.url);
   next();
 });
 
@@ -43,6 +44,15 @@ app.get("/health", async (req, res) => {
 app.use("/products", productsRoutes);
 app.use("/listings", listingsRoutes);
 
+app.get("*", (req, res) => {
+  res.json({
+    message: "Catch-all route reached",
+    path: req.path,
+    url: req.url,
+    originalUrl: req.originalUrl
+  });
+});
+
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     console.error("Unhandled error:", err);
@@ -56,6 +66,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   console.log(`✓ Get all products: http://localhost:${PORT}/api/products`);
   console.log(`✓ Get all listings: http://localhost:${PORT}/api/listings`);
 });*/
+
 
 // Graceful shutdown
 process.on("SIGINT", async () => {
