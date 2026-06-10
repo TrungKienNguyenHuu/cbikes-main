@@ -1,6 +1,5 @@
-export default function handler(req: any, res: any) {
-    res.status(200).json({
-        success: true,
-        message: "API function is working"
-    });
-}
+import app from "../backend/dist/app.js";
+
+console.log("APP TYPE:", typeof app);
+
+export default app;
