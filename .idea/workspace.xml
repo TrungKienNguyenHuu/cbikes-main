@@ -5,45 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="28e2b920-4343-40b7-8f21-0104008a97b4" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/.env" beforeDir="false" afterPath="$PROJECT_DIR$/api/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/dist/config/database.d.ts.map" beforeDir="false" afterPath="$PROJECT_DIR$/api/dist/config/database.d.ts.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/dist/config/database.js" beforeDir="false" afterPath="$PROJECT_DIR$/api/dist/config/database.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/dist/config/database.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/api/dist/config/database.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/dist/config/initDB.d.ts.map" beforeDir="false" afterPath="$PROJECT_DIR$/api/dist/config/initDB.d.ts.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/dist/config/initDB.js" beforeDir="false" afterPath="$PROJECT_DIR$/api/dist/config/initDB.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/dist/config/initDB.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/api/dist/config/initDB.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/dist/routes/listings.d.ts.map" beforeDir="false" afterPath="$PROJECT_DIR$/api/dist/routes/listings.d.ts.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/dist/routes/listings.js" beforeDir="false" afterPath="$PROJECT_DIR$/api/dist/routes/listings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/dist/routes/listings.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/api/dist/routes/listings.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/dist/routes/products.d.ts.map" beforeDir="false" afterPath="$PROJECT_DIR$/api/dist/routes/products.d.ts.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/dist/routes/products.js" beforeDir="false" afterPath="$PROJECT_DIR$/api/dist/routes/products.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/dist/routes/products.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/api/dist/routes/products.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/dist/seed/seedData.js" beforeDir="false" afterPath="$PROJECT_DIR$/api/dist/seed/seedData.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/dist/seed/seedData.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/api/dist/seed/seedData.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/dist/types/index.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/api/dist/types/index.d.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/dist/types/index.d.ts.map" beforeDir="false" afterPath="$PROJECT_DIR$/api/dist/types/index.d.ts.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/config/database.ts" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/config/database.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/config/initDB.ts" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/config/initDB.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/routes/listings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/routes/listings.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/routes/products.ts" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/routes/products.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/seed/seedData.ts" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/seed/seedData.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/types/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/types/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/.env" beforeDir="false" afterPath="$PROJECT_DIR$/src/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/constants.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/constants.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/categoryButtonsGroup/CategoryButtonsGroup.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/categoryButtonsGroup/CategoryButtonsGroup.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/filter/BrandFilterDropdown.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/filter/BrandFilterDropdown.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/header/ProductDetail.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/header/ProductDetail.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hooks/filter.hook.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/filter.hook.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/bikeService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/bikeService.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/productService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/productService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vercel.json" beforeDir="false" afterPath="$PROJECT_DIR$/vercel.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="TypeScript File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -151,6 +125,7 @@
       <workItem from="1781081482208" duration="1680000" />
       <workItem from="1781087287952" duration="102000" />
       <workItem from="1781087778573" duration="97000" />
+      <workItem from="1781089996688" duration="474000" />
     </task>
     <servers />
   </component>
