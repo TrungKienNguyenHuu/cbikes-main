@@ -20,6 +20,10 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get("/test", (req, res) => {
+  res.json({ success: true });
+});
+
 
 // Test database connection
 app.get("/health", async (req, res) => {
@@ -74,5 +78,9 @@ process.on("SIGINT", async () => {
     await pool.end();
     process.exit(0);
 });
+
+console.log("Health route registered");
+console.log("Products router mounted");
+console.log("Listings router mounted");
 
 export default app;

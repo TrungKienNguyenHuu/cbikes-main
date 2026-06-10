@@ -20,6 +20,9 @@ app.use((req, res, next) => {
     console.log("URL:", req.url);
     next();
 });
+app.get("/test", (req, res) => {
+    res.json({ success: true });
+});
 // Test database connection
 app.get("/health", async (req, res) => {
     try {
@@ -68,5 +71,8 @@ process.on("SIGINT", async () => {
     await database_1.default.end();
     process.exit(0);
 });
+console.log("Health route registered");
+console.log("Products router mounted");
+console.log("Listings router mounted");
 exports.default = app;
 //# sourceMappingURL=app.js.map
