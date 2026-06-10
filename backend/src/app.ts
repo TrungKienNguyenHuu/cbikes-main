@@ -3,7 +3,6 @@ import cors from "cors";
 import dotenv from "dotenv";
 import productsRoutes from "./routes/products";
 import listingsRoutes from "./routes/listings";
-import { initializeDatabase } from "./config/initDB";
 import pool from "./config/database";
 
 dotenv.config();
@@ -14,19 +13,6 @@ const PORT = process.env.PORT || 5001;
 // Middleware
 app.use(cors());
 app.use(express.json());
-
-// Initialize database on startup
-app.use(async (req, res, next) => {
-    if (!app.locals.dbInitialized) {
-        try {
-            await initializeDatabase();
-            app.locals.dbInitialized = true;
-        } catch (error) {
-            console.error("Failed to initialize database:", error);
-        }
-    }
-    next();
-});
 
 // Test database connection
 app.get("/health", async (req, res) => {

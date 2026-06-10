@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import { Pool } from '../../node_modules/@types/pg';
 
 const pool = new Pool({
   // Hardcoded connection string
