@@ -1,5 +1,9 @@
-import app from "../backend/dist/app.js";
+import appModule from "../backend/dist/app.js";
 
-console.log("APP TYPE:", typeof app);
-
-export default app;
+export default function handler(req: any, res: any) {
+  res.json({
+    type: typeof appModule,
+    keys: Object.keys(appModule),
+    defaultType: typeof (appModule as any).default
+  });
+}
