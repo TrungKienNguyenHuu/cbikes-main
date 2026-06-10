@@ -14,8 +14,9 @@ const PORT = process.env.PORT || 5001;
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.json({ message: "Express app loaded" });
+app.use((req, res, next) => {
+  console.log("PATH:", req.path);
+  next();
 });
 
 
