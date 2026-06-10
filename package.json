@@ -1,6 +1,5 @@
 {
   "name": "cbikes-store",
-  "homepage": "/cbikes/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
