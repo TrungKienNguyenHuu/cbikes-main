@@ -1,4 +1,4 @@
-import { Bike } from "../common/types";
+import { Bike, CategoryAll } from "../common/types";
 
 interface BikeFromAPI {
   id: string;
@@ -199,7 +199,8 @@ const transformProductToBike = (product: ProductFromAPI): Bike | null => {
     const latestUpdate = product.listings.reduce((latest, current) => {
       if (!current.last_updated) return latest;
       const currentUpdate = new Date(current.last_updated).getTime();
-      const latestTime = new Date(latest).getTime();
+      let latestTime: number;
+      latestTime = new Date(latest).getTime();
       return currentUpdate > latestTime ? current.last_updated : latest;
     }, product.listings[0]?.last_updated);
 
@@ -215,7 +216,7 @@ const transformProductToBike = (product: ProductFromAPI): Bike | null => {
     });
 
     // Extract category from brand slug if available
-    const category = product.brand ? normalizeCategory(product.brand.slug) : Category.all;
+    const category = product.brand ? normalizeCategory(product.brand.slug) : CategoryAll;
 
     const bike: Bike = {
       id: product.product_id,
@@ -246,10 +247,10 @@ const transformProductToBike = (product: ProductFromAPI): Bike | null => {
  */
 export const fetchBikesFromAPI = async (): Promise<Bike[]> => {
   try {
-    const apiURL = process.env.REACT_APP_API_URL || "http://localhost:5001";
+    const apiURL = process.env.REACT_APP_API_URL;
     console.log("📡 Fetching bikes from API:", `${apiURL}/api/products`);
     
-    const response = await fetch(`${apiURL}/api/products`);
+    const response = await fetch(`${apiURL}/products`);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch products: ${response.statusText}`);
@@ -279,10 +280,10 @@ export const fetchBikesFromAPI = async (): Promise<Bike[]> => {
  */
 export const fetchBikeByIdFromAPI = async (id: string): Promise<Bike> => {
   try {
-    const apiURL = process.env.REACT_APP_API_URL || "http://localhost:5001";
-    console.log("📡 Fetching bike by ID from API:", `${apiURL}/api/products/${id}`);
+    const apiURL = process.env.REACT_APP_API_URL;
+    console.log("📡 Fetching bike by ID from API:", `${apiURL}/products/${id}`);
     
-    const response = await fetch(`${apiURL}/api/products/${id}`);
+    const response = await fetch(`${apiURL}products/${id}`);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch product: ${response.statusText}`);
