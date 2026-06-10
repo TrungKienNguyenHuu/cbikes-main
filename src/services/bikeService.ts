@@ -248,7 +248,7 @@ const transformProductToBike = (product: ProductFromAPI): Bike | null => {
 export const fetchBikesFromAPI = async (): Promise<Bike[]> => {
   try {
     const apiURL = process.env.REACT_APP_API_URL;
-    console.log("📡 Fetching bikes from API:", `${apiURL}/api/products`);
+    console.log("📡 Fetching bikes from API:", `${apiURL}/products`);
     
     const response = await fetch(`${apiURL}/products`);
 
