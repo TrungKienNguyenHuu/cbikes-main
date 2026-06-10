@@ -162,6 +162,7 @@ export const useFilter = () => {
     setCurrentPage(1);
   }, []);
 
+  
   return {
     filterState,
     filteredBikesList,
