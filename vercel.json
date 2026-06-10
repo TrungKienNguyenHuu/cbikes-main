@@ -1,21 +1,12 @@
 {
-  "version": 2,
-  "functions": {
-    "api/index.ts": {
-      "runtime": "@vercel/node"
-    }
-  },
+  "outputDirectory": "build",
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/index.ts"
+      "source": "/api/(.*)",
+      "destination": "/api"
     },
     {
-      "source": "/assets/(.*)",
-      "destination": "/static/$1"
-    },
-    {
-      "source": "/((?!api).*)" ,
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
