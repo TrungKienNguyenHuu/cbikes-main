@@ -48,8 +48,8 @@ app.get("/health", async (req, res) => {
 });
 
 // Routes
-app.use("/api/products", productsRoutes);
-app.use("/api/listings", listingsRoutes);
+app.use("/products", productsRoutes);
+app.use("/listings", listingsRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

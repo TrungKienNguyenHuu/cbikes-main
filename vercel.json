@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build",
-  "installCommand": "npm install",
+  "installCommand": "npm run build && cd backend && npm run build",
   "outputDirectory": "build",
   "env": {
     "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/ecommerce_db",
