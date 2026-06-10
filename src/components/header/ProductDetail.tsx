@@ -96,7 +96,7 @@ const StyledImageSection = styled.div`
 
 const StyledImage = styled.img`
   max-width: 100%;
-  max-height: 500px;
+  max-height: 700px;
   object-fit: contain;
 `;
 
@@ -187,43 +187,69 @@ const StyledSpecRowValue = styled.span`
 
 const StyledDescriptionSection = styled.section`
   margin-top: 2rem;
-  padding: 1.25rem;
+  padding: 2rem;
   background-color: #ffffff;
   border: 1px solid #e5e5e5;
   border-radius: 10px;
-  line-height: 1.8;
-  color: #444;
+  line-height: 1.9;
+  color: #333;
 
   /* HTML content styles */
   img {
     max-width: 100%;
     height: auto;
     border-radius: 8px;
-    margin: 1rem 0;
+    margin: 1.5rem 0;
     display: block;
   }
 
   p {
-    margin: 1rem 0;
-    line-height: 1.8;
+    margin: 1.2rem 0;
+    line-height: 1.9;
+    font-size: 1rem;
+    text-align: justify;
   }
 
   ul, ol {
-    margin: 1rem 0 1rem 2rem;
-    line-height: 1.8;
+    margin: 1.2rem 0 1.2rem 2.5rem;
+    line-height: 1.9;
   }
 
   li {
-    margin: 0.5rem 0;
+    margin: 0.8rem 0;
+    font-size: 1rem;
+    line-height: 1.8;
   }
 
   strong {
     font-weight: 700;
-    color: #333;
+    color: #222;
+  }
+
+  em {
+    font-style: italic;
+    color: #555;
   }
 
   br {
-    line-height: 1.5;
+    line-height: 2;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.8rem;
+    color: #222;
+    font-weight: 700;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+    border-bottom: 2px solid #ff6b35;
+    padding-bottom: 0.5rem;
+  }
+
+  h3 {
+    font-size: 1.2rem;
   }
 `;
 
@@ -507,7 +533,16 @@ export const ProductDetail = () => {
                 />
               );
             } else {
-              return <p>{product.description}</p>;
+              // Split plain text descriptions into paragraphs for better readability
+              const paragraphs = product.description
+                .split(/\n\n+|\.\s+(?=[A-Z])/)
+                .filter(p => p.trim().length > 0)
+                .map((para, idx) => (
+                  <p key={idx}>
+                    {para.trim().endsWith('.') ? para.trim() : para.trim() + '.'}
+                  </p>
+                ));
+              return <>{paragraphs}</>;
             }
           })()
         ) : (

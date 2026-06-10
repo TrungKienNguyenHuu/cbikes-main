@@ -58,12 +58,12 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 // Start server
-app.listen(PORT, () => {
+/*app.listen(PORT, () => {
   console.log(`✓ Test Backend Server running on http://localhost:${PORT}`);
   console.log(`✓ Health check: http://localhost:${PORT}/health`);
   console.log(`✓ Get all products: http://localhost:${PORT}/api/products`);
   console.log(`✓ Get all listings: http://localhost:${PORT}/api/listings`);
-});
+});*/
 
 // Graceful shutdown
 process.on("SIGINT", async () => {
@@ -71,3 +71,5 @@ process.on("SIGINT", async () => {
   await pool.end();
   process.exit(0);
 });
+
+export default app;

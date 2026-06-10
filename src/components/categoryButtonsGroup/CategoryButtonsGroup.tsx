@@ -23,6 +23,17 @@ export const CategoryButtonsGroup = memo(
       ? categories
       : [{ id: "all", name: "All" }, ...categories];
 
+    // 2. Handle category click with toggle functionality
+    const handleCategoryClick = (categoryId: string) => {
+      if (currentCategory === categoryId) {
+        // If clicking the same category, deselect it and go back to "all"
+        handleCurrentCategory("all");
+      } else {
+        // Otherwise, select the new category
+        handleCurrentCategory(categoryId);
+      }
+    };
+
     return (
       <StyledCategoryWrapper>
         {/* 2. Map over our guaranteed displayCategories instead of the raw prop */}
@@ -33,7 +44,8 @@ export const CategoryButtonsGroup = memo(
             <StyledCategoryItem
               key={category.id}
               isChecked={isChecked}
-              onClick={() => handleCurrentCategory(category.id)}
+              onClick={() => handleCategoryClick(category.id)}
+              title={isChecked && category.id !== "all" ? "Click again to deselect" : ""}
             >
               <input
                 onChange={() => null}

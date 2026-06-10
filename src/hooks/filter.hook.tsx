@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DEFAULT_MAX_PRICE } from "../common/constants";
-import { Bike, Category, FilterState } from "../common/types";
+import { Bike, CategoryAll, FilterState } from "../common/types";
 import { fetchBikesFromAPI } from "../services/bikeService";
 import { useSorting, SortType } from "./sorting.hook";
 import { useSearch } from "./search.hook";
 
 export const useFilter = () => {
   const [filterState, setFilterState] = useState<FilterState>({
-    currentCategory: Category.all,
+    currentCategory: "all",
     maxPrice: DEFAULT_MAX_PRICE,
     currentSeller: "all", // 👈 Ensure this matches your FilterState type
   });
@@ -47,7 +47,7 @@ export const useFilter = () => {
     const allBrands = bikesList.map((bike) => bike.category);
 
     const distinctBrands = Array.from(
-        new Set(allBrands.filter((brand) => brand && brand !== "all" && brand !== Category.all))
+        new Set(allBrands.filter((brand) => brand && brand !== "all"))
     );
 
     return distinctBrands.map((brand) => ({
@@ -88,7 +88,6 @@ export const useFilter = () => {
             const matchesPrice = bike.price <= filterState.maxPrice;
 
             const matchesCategory =
-                filterState.currentCategory === Category.all ||
                 filterState.currentCategory === "all" ||
                 bike.category.toLowerCase() === filterState.currentCategory.toLowerCase();
 
@@ -154,7 +153,7 @@ export const useFilter = () => {
 
   const resetFilters = useCallback(() => {
     setFilterState({
-      currentCategory: Category.all,
+      currentCategory: "all",
       maxPrice: DEFAULT_MAX_PRICE,
       currentSeller: "all", // 👈 Ensure seller resets to "all"
     });

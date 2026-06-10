@@ -1,6 +1,6 @@
-export const DEFAULT_MAX_PRICE = 2850;
+export const DEFAULT_MAX_PRICE = 5000000;
 export const DEFAULT_MIN_RANGE = 350;
-export const DEFAULT_MAX_RANGE = 38700000;
+export const DEFAULT_MAX_RANGE = 100000000;
 export const WEB_APP_NAME = "CBIKES-SHOP";
 export const IMG_PATH =
   "https://raw.githubusercontent.com/constantinehuzenko/cbikes/master/i/";

@@ -1,15 +1,9 @@
-import { Pool } from "../../node_modules/@types/pg";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const isLocalConnection =
-  process.env.DATABASE_URL?.includes("localhost") ||
-  process.env.DATABASE_URL?.includes("127.0.0.1");
+import { Pool } from "pg";
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: isLocalConnection ? false : { rejectUnauthorized: false },
+  // Hardcoded connection string
+  connectionString: "postgresql://neondb_owner:npg_JchlwWix7pA1@ep-shiny-cake-apgnhg50-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+  ssl: true,
   connectionTimeoutMillis: 10_000,
   idleTimeoutMillis: 30_000,
   keepAlive: true,

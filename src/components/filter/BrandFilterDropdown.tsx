@@ -199,9 +199,14 @@ export const BrandFilterDropdown = memo(
       setSearchTerm("");
     };
 
+    // Add "All" option at the top
+    const allOption = { id: "all", name: "All Brands" };
+    const itemsWithAll = [allOption, ...items];
+
     return (
       <DropdownContainer ref={containerRef}>
         <DropdownButton
+          type="button"
           isOpen={isOpen}
           onClick={() => setIsOpen(!isOpen)}
           aria-expanded={isOpen}
@@ -220,10 +225,23 @@ export const BrandFilterDropdown = memo(
             onChange={(e) => setSearchTerm(e.target.value)}
             onClick={(e) => e.stopPropagation()}
           />
+          {searchTerm === "" && (
+            <DropdownItem
+              key="all"
+              type="button"
+              isSelected={currentValue === "all"}
+              onClick={() => handleSelect("all")}
+            >
+              <input type="radio" checked={currentValue === "all"} readOnly />
+              <span>{allOption.name}</span>
+              {currentValue === "all" && <SelectedBadge>✓</SelectedBadge>}
+            </DropdownItem>
+          )}
           {filteredItems.length > 0 ? (
             filteredItems.map((item) => (
               <DropdownItem
                 key={item.id}
+                type="button"
                 isSelected={item.id === currentValue}
                 onClick={() => handleSelect(item.id)}
               >

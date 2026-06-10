@@ -1,27 +1,56 @@
+export interface Brand {
+  brand_id: string;
+  name: string;
+  slug: string;
+  logo_url?: string;
+  description?: string;
+  created_at: Date;
+}
+
+export interface Platform {
+  platform_id: string;
+  name: string;
+  slug: string;
+  logo_url?: string;
+  is_marketplace: boolean;
+}
+
 export interface Product {
   product_id: string;
+  brand_id?: string;
   name: string;
-  url?: string;
+  slug: string;
   image_url?: string;
   description?: string;
-  brand: string;
   specifications?: Record<string, any>;
   created_at: Date;
+  brand?: Brand; // Optional brand details when joined
 }
 
 export interface ProductListing {
   listing_id: string;
   product_id: string;
-  source_name: string;
+  platform_id: string;
   listing_title: string;
   price: number;
-  url?: string;
+  url: string;
   image_url?: string;
-  description?: string;
-  specifications?: Record<string, any>;
+  first_seen: Date;
   last_updated: Date;
+  platform?: Platform; // Optional platform details when joined
+}
+
+export interface PriceHistory {
+  history_id: string;
+  listing_id: string;
+  price: number;
+  recorded_at: Date;
 }
 
 export interface ProductWithListings extends Product {
   listings: ProductListing[];
+}
+
+export interface ListingWithPriceHistory extends ProductListing {
+  priceHistory?: PriceHistory[];
 }

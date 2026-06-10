@@ -2,14 +2,40 @@ import pool from "./database";
 
 export const initializeDatabase = async () => {
   try {
-    console.log("🔧 Initializing test database...");
+    console.log("🔧 Initializing database with new schema...");
 
-    // Create products table
+    // 1. Create brands table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS brands (
+        brand_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(100) UNIQUE NOT NULL,
+        slug VARCHAR(100) UNIQUE NOT NULL,
+        logo_url TEXT,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log("✓ Brands table created/verified");
+
+    // 2. Create platforms table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS platforms (
+        platform_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(50) UNIQUE NOT NULL,
+        slug VARCHAR(50) UNIQUE NOT NULL,
+        logo_url TEXT,
+        is_marketplace BOOLEAN DEFAULT true
+      );
+    `);
+    console.log("✓ Platforms table created/verified");
+
+    // 3. Create products table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS products (
-        product_id UUID PRIMARY KEY,
+        product_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        brand_id UUID REFERENCES brands(brand_id) ON DELETE SET NULL,
         name VARCHAR(500) UNIQUE NOT NULL,
-        url TEXT,
+        slug VARCHAR(500) UNIQUE NOT NULL,
         image_url TEXT,
         description TEXT,
         specifications JSONB,
@@ -18,23 +44,33 @@ export const initializeDatabase = async () => {
     `);
     console.log("✓ Products table created/verified");
 
-    // Create product_listings table
+    // 4. Create product_listings table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS product_listings (
-        listing_id UUID PRIMARY KEY,
+        listing_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         product_id UUID REFERENCES products(product_id) ON DELETE CASCADE,
-        source_name VARCHAR(50) NOT NULL,
+        platform_id UUID REFERENCES platforms(platform_id) ON DELETE CASCADE,
         listing_title TEXT NOT NULL,
         price INTEGER NOT NULL,
-        url TEXT,
+        url TEXT NOT NULL,
         image_url TEXT,
-        description TEXT,
-        specifications JSONB,
+        first_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(product_id, source_name, listing_title)
+        UNIQUE(product_id, platform_id, listing_title)
       );
     `);
     console.log("✓ Product listings table created/verified");
+
+    // 5. Create price_history table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS price_history (
+        history_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        listing_id UUID REFERENCES product_listings(listing_id) ON DELETE CASCADE,
+        price INTEGER NOT NULL,
+        recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log("✓ Price history table created/verified");
 
     console.log("✅ Database initialization complete");
   } catch (error) {

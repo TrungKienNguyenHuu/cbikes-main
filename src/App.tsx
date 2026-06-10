@@ -46,8 +46,22 @@ const PageLayout = styled.div`
   flex-direction: column;
 `;
 
-const PageContent = styled.div`
+interface PageContentProps {
+  hasCart?: boolean;
+}
+
+const PageContent = styled.div<PageContentProps>`
   flex: 1;
+  padding-bottom: ${props => props.hasCart ? '280px' : '0'};
+  transition: padding-bottom 0.3s ease;
+
+  @media (max-width: ${BREAKPOINTS.tablet}) {
+    padding-bottom: ${props => props.hasCart ? '320px' : '0'};
+  }
+
+  @media (max-width: 480px) {
+    padding-bottom: ${props => props.hasCart ? '360px' : '0'};
+  }
 `;
 
 const LoadingMessage = styled.div`
@@ -141,7 +155,7 @@ const AppContent = () => {
       <ToastDisplay />
       <Router basename="/cbikes">
         <PageLayout>
-          <PageContent>
+          <PageContent hasCart={shoppingCart.length > 0}>
             <Routes>
               <Route
                 path="/"
@@ -174,6 +188,9 @@ const AppContent = () => {
                           />
                         </div>
                         <PriceControl maxPrice={maxPrice} handleMaxPrice={handleMaxPrice} />
+                        <div style={{ marginTop: "20px" }}>
+                          <ResetButton onClick={resetFilters}>↻ Reset Filters</ResetButton>
+                        </div>
                       </Filter>
                       <MainContent>
                         {isLoading ? (

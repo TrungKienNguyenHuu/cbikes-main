@@ -27,12 +27,8 @@ export interface Bike {
   lastUpdated?: string;
 }
 
-export enum Category {
-  all = "all",
-  vinfast = "vinfast",
-  yaeda = "yaeda",
-  kazuki = "kazuki",
-}
+// Dynamic category values - "all" is always available, others come from brands table
+export const CategoryAll = "all";
 
 export interface FilterState {
   currentCategory: string;

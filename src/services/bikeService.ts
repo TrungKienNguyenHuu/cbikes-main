@@ -1,4 +1,4 @@
-import { Bike, Category } from "../common/types";
+import { Bike } from "../common/types";
 
 interface BikeFromAPI {
   id: string;
@@ -11,31 +11,49 @@ interface BikeFromAPI {
 }
 
 /**
- * Interface for products from test backend
+ * Interface for products from API (new schema)
  */
-interface ProductFromTestAPI {
+interface ProductFromAPI {
   product_id: string;
   name: string;
-  url?: string;
+  slug: string;
+  brand_id?: string;
   image_url?: string;
   description?: string;
-  brand?: string;
   specifications?: Record<string, any>;
   created_at: string;
+  brand?: BrandInfo;
   listings: ProductListing[];
+}
+
+interface BrandInfo {
+  brand_id: string;
+  name: string;
+  slug: string;
+  logo_url?: string;
+  description?: string;
+  created_at: string;
 }
 
 interface ProductListing {
   listing_id: string;
   product_id: string;
-  source_name: string;
+  platform_id: string;
   listing_title: string;
   price: number;
-  url?: string;
+  url: string;
   image_url?: string;
-  description?: string;
-  specifications?: Record<string, any>;
+  first_seen: string;
   last_updated: string;
+  platform?: PlatformInfo;
+}
+
+interface PlatformInfo {
+  platform_id: string;
+  name: string;
+  slug: string;
+  logo_url?: string;
+  is_marketplace: boolean;
 }
 
 /**
@@ -58,20 +76,9 @@ const parsePrice = (price: number | string): number => {
   return isNaN(parsed) ? 0 : parsed;
 };
 
-const normalizeCategory = (raw?: string | null): keyof typeof Category => {
-  if (!raw) return Category.all;
-
-  const normalized = raw.trim().toLowerCase();
-  const categoryIds: Array<keyof typeof Category> = ["vinfast", "yaeda", "kazuki"];
-
-  if (categoryIds.includes(normalized as keyof typeof Category)) {
-    return normalized as keyof typeof Category;
-  }
-
-  console.warn(
-    `⚠️ Category "${raw}" not recognized for filtering, using "all"`
-  );
-  return Category.all;
+const normalizeCategory = (raw?: string | null): string => {
+  if (!raw) return "all";
+  return raw.trim().toLowerCase();
 };
 
 /**
@@ -172,11 +179,11 @@ const keepLowestPricePerName = (bikes: Bike[]): Bike[] => {
 // };
 
 /**
- * Transform product from test backend to Bike format
+ * Transform product from API to Bike format
  * Takes the first (lowest price) listing from a product
  * Includes all listings as sellers
  */
-const transformProductToBike = (product: ProductFromTestAPI): Bike | null => {
+const transformProductToBike = (product: ProductFromAPI): Bike | null => {
   try {
     if (!product.listings || product.listings.length === 0) {
       console.warn(`⚠️ No listings found for product ${product.name}`);
@@ -198,22 +205,25 @@ const transformProductToBike = (product: ProductFromTestAPI): Bike | null => {
 
     // Transform all listings to sellers format
     const sellers = product.listings.map((listing) => {
-      const sellerUrl = listing.url || product.url || "";
-      console.log(`🏪 Seller: ${listing.source_name} | URL: ${sellerUrl} | Price: ${listing.price}`);
+      const platformName = listing.platform?.name || "Unknown Platform";
+      console.log(`🏪 Seller: ${platformName} | URL: ${listing.url} | Price: ${listing.price}`);
       return {
-        name: listing.source_name,
+        name: platformName,
         price: listing.price,
-        url: sellerUrl,
+        url: listing.url,
       };
     });
+
+    // Extract category from brand slug if available
+    const category = product.brand ? normalizeCategory(product.brand.slug) : Category.all;
 
     const bike: Bike = {
       id: product.product_id,
       name: product.name,
       price: lowestPriceListing.price,
       imgSrc: product.image_url || lowestPriceListing.image_url || "", // Use product image or listing image
-      category: product.brand ? product.brand.toLowerCase() : "all",
-      link: product.url || lowestPriceListing.url || "",
+      category: category,
+      link: lowestPriceListing.url || "",
       reviewText: `Available at ${product.listings.length} store${product.listings.length > 1 ? "s" : ""}`,
       sellers: sellers,
       description: product.description,
@@ -231,22 +241,22 @@ const transformProductToBike = (product: ProductFromTestAPI): Bike | null => {
 };
 
 /**
- * Fetch all bikes from the test backend (port 5001)
- * ✅ NEW: Fetches from test backend with product listings
+ * Fetch all bikes from the API (port 5001)
+ * ✅ Fetches from API with product listings using new schema
  */
 export const fetchBikesFromAPI = async (): Promise<Bike[]> => {
   try {
-    const testBackendURL = process.env.REACT_APP_TEST_BACKEND_URL || "http://localhost:5001";
-    console.log("📡 Fetching bikes from test backend:", `${testBackendURL}/api/products`);
+    const apiURL = process.env.REACT_APP_API_URL || "http://localhost:5001";
+    console.log("📡 Fetching bikes from API:", `${apiURL}/api/products`);
     
-    const response = await fetch(`${testBackendURL}/api/products`);
+    const response = await fetch(`${apiURL}/api/products`);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch products: ${response.statusText}`);
     }
 
-    const products: ProductFromTestAPI[] = await response.json();
-    console.log("📥 Raw test backend response:", products);
+    const products: ProductFromAPI[] = await response.json();
+    console.log("📥 Raw API response:", products);
     
     // Transform products to bikes format
     const transformedBikes: Bike[] = products
@@ -258,27 +268,27 @@ export const fetchBikesFromAPI = async (): Promise<Bike[]> => {
 
     return lowestPriceBikes;
   } catch (error) {
-    console.error("❌ Error fetching bikes from test backend:", error);
+    console.error("❌ Error fetching bikes from API:", error);
     throw error;
   }
 };
 
 /**
- * Fetch a single bike by ID from the test backend (port 5001)
- * ✅ NEW: Fetches from test backend with product listings
+ * Fetch a single bike by ID from the API (port 5001)
+ * ✅ Fetches from API with product listings using new schema
  */
 export const fetchBikeByIdFromAPI = async (id: string): Promise<Bike> => {
   try {
-    const testBackendURL = process.env.REACT_APP_TEST_BACKEND_URL || "http://localhost:5001";
-    console.log("📡 Fetching bike by ID from test backend:", `${testBackendURL}/api/products/${id}`);
+    const apiURL = process.env.REACT_APP_API_URL || "http://localhost:5001";
+    console.log("📡 Fetching bike by ID from API:", `${apiURL}/api/products/${id}`);
     
-    const response = await fetch(`${testBackendURL}/api/products/${id}`);
+    const response = await fetch(`${apiURL}/api/products/${id}`);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch product: ${response.statusText}`);
     }
 
-    const product: ProductFromTestAPI = await response.json();
+    const product: ProductFromAPI = await response.json();
     console.log("📥 Fetched product:", product);
     
     const bike = transformProductToBike(product);
@@ -288,7 +298,7 @@ export const fetchBikeByIdFromAPI = async (id: string): Promise<Bike> => {
     
     return bike;
   } catch (error) {
-    console.error(`❌ Error fetching bike ${id} from test backend:`, error);
+    console.error(`❌ Error fetching bike ${id} from API:`, error);
     throw error;
   }
 };
