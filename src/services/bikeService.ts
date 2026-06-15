@@ -283,7 +283,7 @@ export const fetchBikeByIdFromAPI = async (id: string): Promise<Bike> => {
     const apiURL = process.env.REACT_APP_API_URL;
     console.log("📡 Fetching bike by ID from API:", `${apiURL}/products/${id}`);
     
-    const response = await fetch(`${apiURL}products/${id}`);
+    const response = await fetch(`${apiURL}/products/${id}`);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch product: ${response.statusText}`);
