@@ -13,6 +13,11 @@ export interface BikeSpecifications {
   chargingTime: string;
 }
 
+export interface PriceHistoryPoint {
+  date: string;
+  price: number;
+}
+
 export interface Bike {
   id: string;
   name: string;
@@ -25,6 +30,7 @@ export interface Bike {
   description?: string;
   sellers?: Seller[];
   lastUpdated?: string;
+  priceHistory?: PriceHistoryPoint[];
 }
 
 // Dynamic category values - "all" is always available, others come from brands table

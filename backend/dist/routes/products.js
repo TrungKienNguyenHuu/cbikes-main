@@ -6,6 +6,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const database_1 = __importDefault(require("../config/database"));
 const router = (0, express_1.Router)();
+const extractSellersFromListings = (listings) => {
+    const sellerMap = new Map();
+    listings.forEach((listing) => {
+        const platformId = listing.platform?.platform_id || listing.platform_id;
+        if (platformId) {
+            const platformName = listing.platform?.name || platformId;
+            if (!sellerMap.has(platformId)) {
+                sellerMap.set(platformId, {
+                    name: platformName,
+                    price: listing.price,
+                    url: listing.url,
+                });
+            }
+            else {
+                const existing = sellerMap.get(platformId);
+                if (listing.price < existing.price) {
+                    existing.price = listing.price;
+                    existing.url = listing.url;
+                }
+            }
+        }
+    });
+    return Array.from(sellerMap.values());
+};
 // GET all products with their listings and brand info
 router.get("/", async (req, res) => {
     try {
@@ -53,25 +77,30 @@ router.get("/", async (req, res) => {
       ORDER BY p.created_at DESC
     `;
         const result = await database_1.default.query(query);
-        const products = result.rows.map((row) => ({
-            product_id: row.product_id,
-            brand_id: row.brand_id,
-            name: row.name,
-            slug: row.slug,
-            image_url: row.image_url,
-            description: row.description,
-            specifications: row.specifications,
-            created_at: row.created_at,
-            brand: row.brand_id ? {
+        const products = result.rows.map((row) => {
+            const listings = row.listings || [];
+            const sellers = extractSellersFromListings(listings);
+            return {
+                product_id: row.product_id,
                 brand_id: row.brand_id,
-                name: row.brand_name,
-                slug: row.brand_slug,
-                logo_url: row.brand_logo_url,
-                description: row.brand_description,
+                name: row.name,
+                slug: row.slug,
+                image_url: row.image_url,
+                description: row.description,
+                specifications: row.specifications,
                 created_at: row.created_at,
-            } : undefined,
-            listings: row.listings || [],
-        }));
+                brand: row.brand_id ? {
+                    brand_id: row.brand_id,
+                    name: row.brand_name,
+                    slug: row.brand_slug,
+                    logo_url: row.brand_logo_url,
+                    description: row.brand_description,
+                    created_at: row.created_at,
+                } : undefined,
+                listings: listings,
+                sellers: sellers,
+            };
+        });
         res.json(products);
     }
     catch (error) {
@@ -132,6 +161,8 @@ router.get("/:productId", async (req, res) => {
             return;
         }
         const row = result.rows[0];
+        const listings = row.listings || [];
+        const sellers = extractSellersFromListings(listings);
         const product = {
             product_id: row.product_id,
             brand_id: row.brand_id,
@@ -149,7 +180,8 @@ router.get("/:productId", async (req, res) => {
                 description: row.brand_description,
                 created_at: row.created_at,
             } : undefined,
-            listings: row.listings || [],
+            listings: listings,
+            sellers: sellers,
         };
         res.json(product);
     }

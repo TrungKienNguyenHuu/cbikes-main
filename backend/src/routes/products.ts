@@ -4,7 +4,37 @@ import { ProductWithListings } from "../types";
 
 const router = Router();
 
-// GET all products with their listings and brand info
+// Helper function to extract unique sellers from listings
+const extractSellersFromListings = (listings: any[]) => {
+  const sellerMap = new Map<string, { name: string; price: number; url: string }>();
+
+  listings.forEach((listing) => {
+    const platformId = listing.platform?.platform_id || listing.platform_id;
+
+    if (platformId) {
+      const platformName = listing.platform?.name || platformId;
+
+      if (!sellerMap.has(platformId)) {
+        sellerMap.set(platformId, {
+          name: platformName,
+          price: listing.price,
+          url: listing.url,
+        });
+      } else {
+        // Keep the minimum price for this seller
+        const existing = sellerMap.get(platformId)!;
+        if (listing.price < existing.price) {
+          existing.price = listing.price;
+          existing.url = listing.url;
+        }
+      }
+    }
+  });
+
+  return Array.from(sellerMap.values());
+};
+
+// GET all products with their listings and brand info, including price history
 router.get("/", async (req: Request, res: Response) => {
   try {
     const query = `
@@ -22,7 +52,7 @@ router.get("/", async (req: Request, res: Response) => {
         b.slug as brand_slug,
         b.logo_url as brand_logo_url,
         b.description as brand_description,
-        json_agg(
+        COALESCE(json_agg(
           json_build_object(
             'listing_id', pl.listing_id,
             'product_id', pl.product_id,
@@ -39,37 +69,54 @@ router.get("/", async (req: Request, res: Response) => {
               'slug', plat.slug,
               'logo_url', plat.logo_url,
               'is_marketplace', plat.is_marketplace
-            )
+            ),
+            'priceHistory', COALESCE(ph_data.price_history, '[]'::json)
           ) ORDER BY pl.price ASC
-        ) FILTER (WHERE pl.listing_id IS NOT NULL) as listings
+        ) FILTER (WHERE pl.listing_id IS NOT NULL), '[]'::json) as listings
       FROM products p
       LEFT JOIN brands b ON p.brand_id = b.brand_id
       LEFT JOIN product_listings pl ON p.product_id = pl.product_id
       LEFT JOIN platforms plat ON pl.platform_id = plat.platform_id
+      LEFT JOIN LATERAL (
+        SELECT json_agg(
+          json_build_object(
+            'date', recorded_at::date,
+            'price', price
+          ) ORDER BY recorded_at
+        ) as price_history
+        FROM price_history
+        WHERE listing_id = pl.listing_id
+      ) ph_data ON TRUE
       GROUP BY p.product_id, p.brand_id, p.name, p.slug, p.image_url, p.description, p.specifications, p.created_at,
                b.brand_id, b.name, b.slug, b.logo_url, b.description
       ORDER BY p.created_at DESC
     `;
     const result = await pool.query(query);
-    const products: ProductWithListings[] = result.rows.map((row) => ({
-      product_id: row.product_id,
-      brand_id: row.brand_id,
-      name: row.name,
-      slug: row.slug,
-      image_url: row.image_url,
-      description: row.description,
-      specifications: row.specifications,
-      created_at: row.created_at,
-      brand: row.brand_id ? {
+    const products: any[] = result.rows.map((row) => {
+      const listings = row.listings || [];
+      const sellers = extractSellersFromListings(listings);
+
+      return {
+        product_id: row.product_id,
         brand_id: row.brand_id,
-        name: row.brand_name,
-        slug: row.brand_slug,
-        logo_url: row.brand_logo_url,
-        description: row.brand_description,
+        name: row.name,
+        slug: row.slug,
+        image_url: row.image_url,
+        description: row.description,
+        specifications: row.specifications,
         created_at: row.created_at,
-      } : undefined,
-      listings: row.listings || [],
-    }));
+        brand: row.brand_id ? {
+          brand_id: row.brand_id,
+          name: row.brand_name,
+          slug: row.brand_slug,
+          logo_url: row.brand_logo_url,
+          description: row.brand_description,
+          created_at: row.created_at,
+        } : undefined,
+        listings: listings,
+        sellers: sellers,
+      };
+    });
     res.json(products);
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -77,7 +124,7 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
-// GET product by ID with listings and brand info
+// GET product by ID with listings and brand info, including price history
 router.get("/:productId", async (req: Request, res: Response) => {
   try {
     const { productId } = req.params;
@@ -96,7 +143,7 @@ router.get("/:productId", async (req: Request, res: Response) => {
         b.slug as brand_slug,
         b.logo_url as brand_logo_url,
         b.description as brand_description,
-        json_agg(
+        COALESCE(json_agg(
           json_build_object(
             'listing_id', pl.listing_id,
             'product_id', pl.product_id,
@@ -113,13 +160,24 @@ router.get("/:productId", async (req: Request, res: Response) => {
               'slug', plat.slug,
               'logo_url', plat.logo_url,
               'is_marketplace', plat.is_marketplace
-            )
+            ),
+            'priceHistory', COALESCE(ph_data.price_history, '[]'::json)
           ) ORDER BY pl.price ASC
-        ) FILTER (WHERE pl.listing_id IS NOT NULL) as listings
+        ) FILTER (WHERE pl.listing_id IS NOT NULL), '[]'::json) as listings
       FROM products p
       LEFT JOIN brands b ON p.brand_id = b.brand_id
       LEFT JOIN product_listings pl ON p.product_id = pl.product_id
       LEFT JOIN platforms plat ON pl.platform_id = plat.platform_id
+      LEFT JOIN LATERAL (
+        SELECT json_agg(
+          json_build_object(
+            'date', recorded_at::date,
+            'price', price
+          ) ORDER BY recorded_at
+        ) as price_history
+        FROM price_history
+        WHERE listing_id = pl.listing_id
+      ) ph_data ON TRUE
       WHERE p.product_id = $1
       GROUP BY p.product_id, p.brand_id, p.name, p.slug, p.image_url, p.description, p.specifications, p.created_at,
                b.brand_id, b.name, b.slug, b.logo_url, b.description
@@ -132,7 +190,10 @@ router.get("/:productId", async (req: Request, res: Response) => {
     }
 
     const row = result.rows[0];
-    const product: ProductWithListings = {
+    const listings = row.listings || [];
+    const sellers = extractSellersFromListings(listings);
+
+    const product: any = {
       product_id: row.product_id,
       brand_id: row.brand_id,
       name: row.name,
@@ -149,7 +210,8 @@ router.get("/:productId", async (req: Request, res: Response) => {
         description: row.brand_description,
         created_at: row.created_at,
       } : undefined,
-      listings: row.listings || [],
+      listings: listings,
+      sellers: sellers,
     };
     res.json(product);
   } catch (error) {

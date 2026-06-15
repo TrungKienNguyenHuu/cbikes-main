@@ -1,4 +1,4 @@
-import { Bike, CategoryAll } from "../common/types";
+import { Bike, CategoryAll, PriceHistoryPoint, Seller } from "../common/types";
 
 interface BikeFromAPI {
   id: string;
@@ -24,6 +24,7 @@ interface ProductFromAPI {
   created_at: string;
   brand?: BrandInfo;
   listings: ProductListing[];
+  sellers?: Seller[];
 }
 
 interface BrandInfo {
@@ -46,6 +47,7 @@ interface ProductListing {
   first_seen: string;
   last_updated: string;
   platform?: PlatformInfo;
+  priceHistory?: Array<{ date: string; price: number }>;
 }
 
 interface PlatformInfo {
@@ -55,6 +57,86 @@ interface PlatformInfo {
   logo_url?: string;
   is_marketplace: boolean;
 }
+
+const mergeSellers = (
+  existingSellers: Seller[] = [],
+  incomingSellers: Seller[] = []
+): Seller[] => {
+  const sellersByName = new Map<string, Seller>();
+
+  [...existingSellers, ...incomingSellers].forEach((seller) => {
+    const name = seller.name?.trim();
+
+    if (!name) {
+      return;
+    }
+
+    const normalizedSeller: Seller = {
+      name,
+      price: seller.price,
+      url: seller.url,
+    };
+    const key = name.toLowerCase();
+    const existing = sellersByName.get(key);
+
+    if (!existing || normalizedSeller.price < existing.price) {
+      sellersByName.set(key, normalizedSeller);
+    }
+  });
+
+  return Array.from(sellersByName.values());
+};
+
+const getSellersFromListings = (listings: ProductListing[]): Seller[] => {
+  const sellers = listings.map((listing) => {
+    const platformName = listing.platform?.name || listing.platform_id || "Unknown Platform";
+
+    return {
+      name: platformName,
+      price: listing.price,
+      url: listing.url,
+    };
+  });
+
+  return mergeSellers([], sellers);
+};
+
+const mergePriceHistory = (
+  existingHistory: PriceHistoryPoint[] = [],
+  incomingHistory: PriceHistoryPoint[] = []
+): PriceHistoryPoint[] | undefined => {
+  const historyByDate = new Map<string, number>();
+
+  [...existingHistory, ...incomingHistory].forEach((entry) => {
+    if (!entry.date) {
+      return;
+    }
+
+    const existingPrice = historyByDate.get(entry.date);
+
+    if (existingPrice === undefined || entry.price < existingPrice) {
+      historyByDate.set(entry.date, entry.price);
+    }
+  });
+
+  const mergedHistory = Array.from(historyByDate.entries())
+    .map(([date, price]) => ({ date, price }))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  return mergedHistory.length > 0 ? mergedHistory : undefined;
+};
+
+const getLatestDate = (
+  existingDate?: string,
+  incomingDate?: string
+): string | undefined => {
+  if (!existingDate) return incomingDate;
+  if (!incomingDate) return existingDate;
+
+  return new Date(incomingDate).getTime() > new Date(existingDate).getTime()
+    ? incomingDate
+    : existingDate;
+};
 
 /**
  * Parse price string to number
@@ -108,7 +190,7 @@ const transformBikeFromAPI = (apiBike: BikeFromAPI): Bike => {
 
 /**
  * Keep one bike per product name, using the minimum price row.
- * This handles duplicated product names scraped from multiple listings.
+ * Merge sellers and history so duplicated API rows do not lose seller counts.
  */
 const keepLowestPricePerName = (bikes: Bike[]): Bike[] => {
   const bikesByName = new Map<string, Bike>();
@@ -117,9 +199,25 @@ const keepLowestPricePerName = (bikes: Bike[]): Bike[] => {
     const key = bike.name.trim().toLowerCase();
     const existing = bikesByName.get(key);
 
-    if (!existing || bike.price < existing.price) {
-      bikesByName.set(key, bike);
+    if (!existing) {
+      bikesByName.set(key, {
+        ...bike,
+        sellers: mergeSellers([], bike.sellers),
+        priceHistory: mergePriceHistory([], bike.priceHistory),
+      });
+      return;
     }
+
+    const lowerPriceBike = bike.price < existing.price ? bike : existing;
+
+    bikesByName.set(key, {
+      ...lowerPriceBike,
+      description: lowerPriceBike.description || existing.description || bike.description,
+      specifications: lowerPriceBike.specifications || existing.specifications || bike.specifications,
+      sellers: mergeSellers(existing.sellers, bike.sellers),
+      lastUpdated: getLatestDate(existing.lastUpdated, bike.lastUpdated),
+      priceHistory: mergePriceHistory(existing.priceHistory, bike.priceHistory),
+    });
   });
 
   return Array.from(bikesByName.values());
@@ -204,19 +302,29 @@ const transformProductToBike = (product: ProductFromAPI): Bike | null => {
       return currentUpdate > latestTime ? current.last_updated : latest;
     }, product.listings[0]?.last_updated);
 
-    // Transform all listings to sellers format
-    const sellers = product.listings.map((listing) => {
-      const platformName = listing.platform?.name || "Unknown Platform";
-      console.log(`🏪 Seller: ${platformName} | URL: ${listing.url} | Price: ${listing.price}`);
-      return {
-        name: platformName,
-        price: listing.price,
-        url: listing.url,
-      };
-    });
+    const sellers = mergeSellers(product.sellers, getSellersFromListings(product.listings));
 
     // Extract category from brand slug if available
     const category = product.brand ? normalizeCategory(product.brand.slug) : CategoryAll;
+
+    // Aggregate price history from all listings (combine and deduplicate by date)
+    const priceHistoryMap = new Map<string, number>();
+    product.listings.forEach((listing) => {
+      if (listing.priceHistory && Array.isArray(listing.priceHistory)) {
+        listing.priceHistory.forEach((entry) => {
+          // If date already exists, keep the lower price
+          const existing = priceHistoryMap.get(entry.date);
+          if (!existing || entry.price < existing) {
+            priceHistoryMap.set(entry.date, entry.price);
+          }
+        });
+      }
+    });
+
+    // Convert map to sorted array
+    const priceHistory = Array.from(priceHistoryMap.entries())
+      .map(([date, price]) => ({ date, price }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     const bike: Bike = {
       id: product.product_id,
@@ -225,15 +333,17 @@ const transformProductToBike = (product: ProductFromAPI): Bike | null => {
       imgSrc: product.image_url || lowestPriceListing.image_url || "", // Use product image or listing image
       category: category,
       link: lowestPriceListing.url || "",
-      reviewText: `Available at ${product.listings.length} store${product.listings.length > 1 ? "s" : ""}`,
+      reviewText: `Available at ${sellers.length} store${sellers.length > 1 ? "s" : ""}`,
       sellers: sellers,
       description: product.description,
       specifications: product.specifications,
       lastUpdated: latestUpdate,
+      priceHistory: priceHistory.length > 0 ? priceHistory : undefined,
     };
 
-    console.log(`📦 Transformed product to bike with ${sellers.length} sellers:`, bike);
+    console.log(`📦 Transformed product to bike with ${sellers.length} sellers and ${priceHistory.length} price history points:`, bike);
     console.log(`📋 Sellers detail:`, sellers);
+    console.log(`📈 Price history:`, priceHistory);
     return bike;
   } catch (error) {
     console.error(`❌ Error transforming product ${product.name}:`, error);

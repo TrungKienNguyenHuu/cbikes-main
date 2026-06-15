@@ -6,6 +6,7 @@ import { fetchBikeByIdFromAPI } from "../../services/bikeService";
 import { useShoppingCart } from "../../hooks/shoppingCart.hook";
 import { getImageUrl, getPlaceholderImage } from "../../utils/imageLoader";
 import { uuid } from "../../utils/uuid";
+import { PriceHistoryChart } from "../priceHistory/PriceHistoryChart";
 
 /**
  * Unescape unicode escape sequences in JSON strings
@@ -250,6 +251,22 @@ const StyledDescriptionSection = styled.section`
 
   h3 {
     font-size: 1.2rem;
+  }
+`;
+
+const StyledPriceHistorySection = styled.section`
+  margin-top: 2rem;
+  padding: 2rem;
+  background-color: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+
+  h2 {
+    font-size: 1.4rem;
+    border-bottom: 2px solid #ff6b35;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+    color: #222;
   }
 `;
 
@@ -549,6 +566,16 @@ export const ProductDetail = () => {
           <p>No product description available for this listing.</p>
         )}
       </StyledDescriptionSection>
+      
+      {product.priceHistory && product.priceHistory.length > 0 && (
+        <StyledPriceHistorySection>
+          <h2>Price History</h2>
+          <PriceHistoryChart 
+            priceHistory={product.priceHistory}
+            currentPrice={product.price}
+          />
+        </StyledPriceHistorySection>
+      )}
     </StyledDetailContainer>
   );
 };

@@ -6,6 +6,16 @@
   <component name="ChangeListManager">
     <list default="true" id="28e2b920-4343-40b7-8f21-0104008a97b4" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/routes/products.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/routes/products.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/types/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/types/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common/constants.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/constants.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/header/ProductDetail.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/header/ProductDetail.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/priceComparison/PriceComparison.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/priceComparison/PriceComparison.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hooks/sorting.hook.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/sorting.hook.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/bikeService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/bikeService.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,6 +80,11 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Magie Nguyen\Downloads\cbikes-main" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -128,6 +143,7 @@
       <workItem from="1781089996688" duration="2211000" />
       <workItem from="1781108484528" duration="128000" />
       <workItem from="1781113768819" duration="2144000" />
+      <workItem from="1781547490930" duration="2508000" />
     </task>
     <servers />
   </component>

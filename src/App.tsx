@@ -189,7 +189,7 @@ const AppContent = () => {
                         </div>
                         <PriceControl maxPrice={maxPrice} handleMaxPrice={handleMaxPrice} />
                         <div style={{ marginTop: "20px" }}>
-                          <ResetButton onClick={resetFilters}>↻ Reset Filters</ResetButton>
+                          <ResetButton type="button" onClick={resetFilters}>↻ Reset Filters</ResetButton>
                         </div>
                       </Filter>
                       <MainContent>
@@ -211,7 +211,7 @@ const AppContent = () => {
                               <EmptyState>
                                 <EmptyStateIcon>🚲</EmptyStateIcon>
                                 <EmptyStateText>No bikes found matching your filters</EmptyStateText>
-                                <ResetButton onClick={resetFilters}>Reset Filters</ResetButton>
+                                <ResetButton type="button" onClick={resetFilters}>Reset Filters</ResetButton>
                               </EmptyState>
                             ) : (
                               <>

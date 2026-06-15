@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { Bike } from "../../common/types";
 import { memo } from "react";
+import { PriceHistoryChart } from "../priceHistory/PriceHistoryChart";
 
 const ComparisonContainer = styled.div`
   padding: 2rem;
@@ -170,6 +171,46 @@ const SpecsTitle = styled.h2`
   padding-bottom: 0.5rem;
 `;
 
+const PriceHistoryComparisonSection = styled.section`
+  margin-top: 2.5rem;
+  padding: 1.5rem;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+`;
+
+const PriceHistoryTitle = styled.h2`
+  font-size: 1.4rem;
+  color: #333;
+  margin: 0 0 1.25rem 0;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 0.5rem;
+`;
+
+const PriceHistoryGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const PriceHistoryChartContainer = styled.div`
+  padding: 1rem;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  background-color: #fafafa;
+`;
+
+const BikeChartTitle = styled.h3`
+  font-size: 1.1rem;
+  color: #333;
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+`;
+
 const SpecsTable = styled.table`
   width: 100%;
   border-collapse: collapse;
@@ -244,17 +285,17 @@ const EmptyStateText = styled.p`
  * Converts flat object to array of {label, value} pairs
  */
 const extractSpecsFromBike = (bike: Bike): Array<{ label: string; value: string }> => {
-  if (!bike.specifications || typeof bike.specifications !== "object") {
-    return [];
-  }
+    if (!bike.specifications || typeof bike.specifications !== "object") {
+        return [];
+    }
 
-  return Object.entries(bike.specifications).map(([key, value]) => ({
-    label: key
-      .replace(/([A-Z])/g, " $1")
-      .replace(/^./, (str) => str.toUpperCase())
-      .trim(),
-    value: String(value),
-  }));
+    return Object.entries(bike.specifications).map(([key, value]) => ({
+        label: key
+            .replace(/([A-Z])/g, " $1")
+            .replace(/^./, (str) => str.toUpperCase())
+            .trim(),
+        value: String(value),
+    }));
 };
 
 /**
@@ -262,151 +303,151 @@ const extractSpecsFromBike = (bike: Bike): Array<{ label: string; value: string 
  * Returns array of category objects with their specs
  */
 const groupSpecsByCategory = (
-  specs: Array<{ label: string; value: string }>
+    specs: Array<{ label: string; value: string }>
 ): Array<{ category: string; specs: Array<{ label: string; value: string }> }> => {
-  const categoryKeywords: Record<string, string> = {
-    Battery: ["battery", "capacity", "ah", "voltage", "v"],
-    Motor: ["motor", "power", "watt", "w", "hub"],
-    Performance: ["speed", "max", "range", "km", "h"],
-    Build: ["frame", "weight", "brakes", "tires", "size"],
-    Other: [],
-  };
+    const categoryKeywords: Record<string, string> = {
+        Battery: ["battery", "capacity", "ah", "voltage", "v"],
+        Motor: ["motor", "power", "watt", "w", "hub"],
+        Performance: ["speed", "max", "range", "km", "h"],
+        Build: ["frame", "weight", "brakes", "tires", "size"],
+        Other: [],
+    };
 
-  const grouped: Record<string, Array<{ label: string; value: string }>> = {
-    Battery: [],
-    Motor: [],
-    Performance: [],
-    Build: [],
-    Other: [],
-  };
+    const grouped: Record<string, Array<{ label: string; value: string }>> = {
+        Battery: [],
+        Motor: [],
+        Performance: [],
+        Build: [],
+        Other: [],
+    };
 
-  specs.forEach((spec) => {
-    const lowerLabel = spec.label.toLowerCase();
-    let categorized = false;
+    specs.forEach((spec) => {
+        const lowerLabel = spec.label.toLowerCase();
+        let categorized = false;
 
-    for (const [category, keywords] of Object.entries(categoryKeywords)) {
-      if (keywords.length === 0) continue;
-      if (keywords.some((keyword) => lowerLabel.includes(keyword))) {
-        grouped[category].push(spec);
-        categorized = true;
-        break;
-      }
-    }
+        for (const [category, keywords] of Object.entries(categoryKeywords)) {
+            if (keywords.length === 0) continue;
+            if (keywords.some((keyword) => lowerLabel.includes(keyword))) {
+                grouped[category].push(spec);
+                categorized = true;
+                break;
+            }
+        }
 
-    if (!categorized) {
-      grouped.Other.push(spec);
-    }
-  });
+        if (!categorized) {
+            grouped.Other.push(spec);
+        }
+    });
 
-  return Object.entries(grouped)
-    .filter(([, specs]) => specs.length > 0)
-    .map(([category, specs]) => ({ category, specs }));
+    return Object.entries(grouped)
+        .filter(([, specs]) => specs.length > 0)
+        .map(([category, specs]) => ({ category, specs }));
 };
 
 /**
  * Get seller details from bike sellers, generate logo from name
  */
 const getSellerDetailsFromBike = (bike: Bike) => {
-  if (!bike.sellers || bike.sellers.length === 0) {
-    return [];
-  }
+    if (!bike.sellers || bike.sellers.length === 0) {
+        return [];
+    }
 
-  return bike.sellers.map((seller) => ({
-    name: seller.name,
-    logo: seller.name.substring(0, 2).toUpperCase(),
-    price: seller.price,
-    url: seller.url,
-  }));
+    return bike.sellers.map((seller) => ({
+        name: seller.name,
+        logo: seller.name.substring(0, 2).toUpperCase(),
+        price: seller.price,
+        url: seller.url,
+    }));
 };
 
 interface IPriceComparisonProps {
-  shoppingCart: Array<Bike>;
-  onBack: () => void;
+    shoppingCart: Array<Bike>;
+    onBack?: () => void;
 }
 
 const ProductComparisonItem = memo(({ bike }: { bike: Bike }) => {
-  const sellers = getSellerDetailsFromBike(bike);
-  const lowestPrice =
-    sellers && sellers.length > 0 ? Math.min(...sellers.map((s) => s.price)) : bike.price;
+    const sellers = getSellerDetailsFromBike(bike);
+    const lowestPrice =
+        sellers && sellers.length > 0 ? Math.min(...sellers.map((s) => s.price)) : bike.price;
 
-  return (
-    <ProductCard>
-      <ProductImage src={bike.imgSrc} alt={bike.name} />
-      <ProductName>{bike.name}</ProductName>
+    return (
+        <ProductCard>
+            <ProductImage src={bike.imgSrc} alt={bike.name} />
+            <ProductName>{bike.name}</ProductName>
 
-      <PriceSection>
-        <PriceLabel>Lowest Price Available:</PriceLabel>
-        <Price>${lowestPrice}</Price>
-      </PriceSection>
+            <PriceSection>
+                <PriceLabel>Lowest Price Available:</PriceLabel>
+                <Price>${lowestPrice}</Price>
+            </PriceSection>
 
-      <SellersSection>
-        <SellersTitle>Available at {sellers.length} Seller{sellers.length !== 1 ? "s" : ""}</SellersTitle>
-        <SellersGrid>
-          {sellers.map((seller) => (
-            <SellerLink
-              key={seller.name}
-              href={seller.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <SellerLeft>
-                <SellerLogo>{seller.logo}</SellerLogo>
-                <SellerName>{seller.name}</SellerName>
-              </SellerLeft>
-              <SellerPrice>${seller.price}</SellerPrice>
-            </SellerLink>
-          ))}
-        </SellersGrid>
-      </SellersSection>
-    </ProductCard>
-  );
+            <SellersSection>
+                <SellersTitle>Available at {sellers.length} Seller{sellers.length !== 1 ? "s" : ""}</SellersTitle>
+                <SellersGrid>
+                    {sellers.map((seller) => (
+                        <SellerLink
+                            key={seller.name}
+                            href={seller.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <SellerLeft>
+                                <SellerLogo>{seller.logo}</SellerLogo>
+                                <SellerName>{seller.name}</SellerName>
+                            </SellerLeft>
+                            <SellerPrice>${seller.price}</SellerPrice>
+                        </SellerLink>
+                    ))}
+                </SellersGrid>
+            </SellersSection>
+        </ProductCard>
+    );
 });
 
 /**
  * Component to render a single specifications table
  */
 const SpecificationTable = memo(
-  ({
-    bikes,
-    specs,
-    title,
-  }: {
-    bikes: Bike[];
-    specs: Array<{ label: string; value: string }>;
-    title?: string;
-  }) => (
-    <SpecsTableWrapper>
-      {title && <SpecsTableTitle>{title}</SpecsTableTitle>}
-      <SpecsTable>
-        <thead>
-          <tr>
-            <SpecsTableHeadCell>Specification</SpecsTableHeadCell>
-            {bikes.map((bike) => (
-              <SpecsTableHeadCell key={bike.id}>{bike.name}</SpecsTableHeadCell>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {specs.map((spec) => (
-            <tr key={spec.label}>
-              <SpecsTableLabelCell>{spec.label}</SpecsTableLabelCell>
-              {bikes.map((bike) => {
-                const bikeSpecs = extractSpecsFromBike(bike);
-                const bikeSpecValue = bikeSpecs.find(
-                  (s) => s.label.toLowerCase() === spec.label.toLowerCase()
-                );
-                return (
-                  <SpecsTableValueCell key={`${bike.id}-${spec.label}`}>
-                    {bikeSpecValue?.value || "N/A"}
-                  </SpecsTableValueCell>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </SpecsTable>
-    </SpecsTableWrapper>
-  )
+    ({
+         bikes,
+         specs,
+         title,
+     }: {
+        bikes: Bike[];
+        specs: Array<{ label: string; value: string }>;
+        title?: string;
+    }) => (
+        <SpecsTableWrapper>
+            {title && <SpecsTableTitle>{title}</SpecsTableTitle>}
+            <SpecsTable>
+                <thead>
+                <tr>
+                    <SpecsTableHeadCell>Specification</SpecsTableHeadCell>
+                    {bikes.map((bike) => (
+                        <SpecsTableHeadCell key={bike.id}>{bike.name}</SpecsTableHeadCell>
+                    ))}
+                </tr>
+                </thead>
+                <tbody>
+                {specs.map((spec) => (
+                    <tr key={spec.label}>
+                        <SpecsTableLabelCell>{spec.label}</SpecsTableLabelCell>
+                        {bikes.map((bike) => {
+                            const bikeSpecs = extractSpecsFromBike(bike);
+                            const bikeSpecValue = bikeSpecs.find(
+                                (s) => s.label.toLowerCase() === spec.label.toLowerCase()
+                            );
+                            return (
+                                <SpecsTableValueCell key={`${bike.id}-${spec.label}`}>
+                                    {bikeSpecValue?.value || "N/A"}
+                                </SpecsTableValueCell>
+                            );
+                        })}
+                    </tr>
+                ))}
+                </tbody>
+            </SpecsTable>
+        </SpecsTableWrapper>
+    )
 );
 
 /**
@@ -414,88 +455,127 @@ const SpecificationTable = memo(
  * Splits specs into multiple tables by category
  */
 const SpecificationsComparison = memo(({ bikes }: { bikes: Bike[] }) => {
-  // Collect all unique specifications across all bikes
-  const allSpecs = new Map<string, { label: string; value: string }>();
-  
-  bikes.forEach((bike) => {
-    const specs = extractSpecsFromBike(bike);
-    specs.forEach((spec) => {
-      const key = spec.label.toLowerCase();
-      if (!allSpecs.has(key)) {
-        allSpecs.set(key, spec);
-      }
+    // Collect all unique specifications across all bikes
+    const allSpecs = new Map<string, { label: string; value: string }>();
+
+    bikes.forEach((bike) => {
+        const specs = extractSpecsFromBike(bike);
+        specs.forEach((spec) => {
+            const key = spec.label.toLowerCase();
+            if (!allSpecs.has(key)) {
+                allSpecs.set(key, spec);
+            }
+        });
     });
-  });
 
-  const uniqueSpecs = Array.from(allSpecs.values());
+    const uniqueSpecs = Array.from(allSpecs.values());
 
-  // If no specifications available, show empty state
-  if (uniqueSpecs.length === 0) {
+    // If no specifications available, show empty state
+    if (uniqueSpecs.length === 0) {
+        return (
+            <SpecsComparisonSection>
+                <SpecsTitle>Specifications</SpecsTitle>
+                <p style={{ color: "#999", textAlign: "center", padding: "2rem" }}>
+                    No specifications available for comparison
+                </p>
+            </SpecsComparisonSection>
+        );
+    }
+
+    // Group specs by category
+    const groupedSpecs = groupSpecsByCategory(uniqueSpecs);
+
     return (
-      <SpecsComparisonSection>
-        <SpecsTitle>Specifications</SpecsTitle>
-        <p style={{ color: "#999", textAlign: "center", padding: "2rem" }}>
-          No specifications available for comparison
-        </p>
-      </SpecsComparisonSection>
+        <SpecsComparisonSection>
+            <SpecsTitle>Specifications Comparison</SpecsTitle>
+            {groupedSpecs.map((group, index) => (
+                <SpecificationTable
+                    key={group.category}
+                    bikes={bikes}
+                    specs={group.specs}
+                    title={groupedSpecs.length > 1 ? group.category : undefined}
+                />
+            ))}
+        </SpecsComparisonSection>
     );
-  }
-
-  // Group specs by category
-  const groupedSpecs = groupSpecsByCategory(uniqueSpecs);
-
-  return (
-    <SpecsComparisonSection>
-      <SpecsTitle>Specifications Comparison</SpecsTitle>
-      {groupedSpecs.map((group, index) => (
-        <SpecificationTable
-          key={group.category}
-          bikes={bikes}
-          specs={group.specs}
-          title={groupedSpecs.length > 1 ? group.category : undefined}
-        />
-      ))}
-    </SpecsComparisonSection>
-  );
 });
 
-export const PriceComparison = memo(
-  ({ shoppingCart }: IPriceComparisonProps) => {
-    const navigate = useNavigate();
+/**
+ * Component to render price history comparison
+ * Shows side-by-side price trend charts for all bikes
+ */
+const PriceHistoryComparison = memo(({ bikes }: { bikes: Bike[] }) => {
+    // Filter bikes that have price history
+    const bikesWithHistory = bikes.filter((bike) => bike.priceHistory && bike.priceHistory.length > 0);
 
-    const handleBack = () => {
-      navigate("/");
-    };
-
-    if (shoppingCart.length === 0) {
-      return (
-        <ComparisonContainer>
-          <ComparisonHeader>
-            <BackButton onClick={handleBack}>← Back to Shopping</BackButton>
-          </ComparisonHeader>
-          <EmptyState>
-            <EmptyStateIcon>🛒</EmptyStateIcon>
-            <EmptyStateText>No products added to cart for comparison</EmptyStateText>
-            <BackButton onClick={handleBack}>Go Back to Shopping</BackButton>
-          </EmptyState>
-        </ComparisonContainer>
-      );
+    // If no bikes have price history, show empty state
+    if (bikesWithHistory.length === 0) {
+        return (
+            <PriceHistoryComparisonSection>
+                <PriceHistoryTitle>Price History Comparison</PriceHistoryTitle>
+                <p style={{ color: "#999", textAlign: "center", padding: "2rem" }}>
+                    No price history available for comparison
+                </p>
+            </PriceHistoryComparisonSection>
+        );
     }
 
     return (
-      <ComparisonContainer>
-        <ComparisonHeader>
-          <BackButton onClick={handleBack}>← Back to Shopping</BackButton>
-        </ComparisonHeader>
-
-        <ComparisonGrid>
-          {shoppingCart.map((bike) => (
-            <ProductComparisonItem key={bike.id} bike={bike} />
-          ))}
-        </ComparisonGrid>
-
-        <SpecificationsComparison bikes={shoppingCart} />
-      </ComparisonContainer>
+        <PriceHistoryComparisonSection>
+            <PriceHistoryTitle>Price History Comparison</PriceHistoryTitle>
+            <PriceHistoryGrid>
+                {bikesWithHistory.map((bike) => (
+                    <PriceHistoryChartContainer key={bike.id}>
+                        <BikeChartTitle>{bike.name}</BikeChartTitle>
+                        <PriceHistoryChart
+                            priceHistory={bike.priceHistory!}
+                            currentPrice={bike.price}
+                        />
+                    </PriceHistoryChartContainer>
+                ))}
+            </PriceHistoryGrid>
+        </PriceHistoryComparisonSection>
     );
-  }
+});
+
+export const PriceComparison = memo(
+    ({ shoppingCart }: IPriceComparisonProps) => {
+        const navigate = useNavigate();
+
+        const handleBack = () => {
+            navigate("/");
+        };
+
+        if (shoppingCart.length === 0) {
+            return (
+                <ComparisonContainer>
+                    <ComparisonHeader>
+                        <BackButton onClick={handleBack}>← Back to Shopping</BackButton>
+                    </ComparisonHeader>
+                    <EmptyState>
+                        <EmptyStateIcon>🛒</EmptyStateIcon>
+                        <EmptyStateText>No products added to cart for comparison</EmptyStateText>
+                        <BackButton onClick={handleBack}>Go Back to Shopping</BackButton>
+                    </EmptyState>
+                </ComparisonContainer>
+            );
+        }
+
+        return (
+            <ComparisonContainer>
+                <ComparisonHeader>
+                    <BackButton onClick={handleBack}>← Back to Shopping</BackButton>
+                </ComparisonHeader>
+
+                <ComparisonGrid>
+                    {shoppingCart.map((bike) => (
+                        <ProductComparisonItem key={bike.id} bike={bike} />
+                    ))}
+                </ComparisonGrid>
+
+                <PriceHistoryComparison bikes={shoppingCart} />
+                <SpecificationsComparison bikes={shoppingCart} />
+            </ComparisonContainer>
+        );
+    }
 );

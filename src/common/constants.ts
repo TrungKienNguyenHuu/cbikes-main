@@ -55,8 +55,12 @@ export const SORT_OPTIONS = [
   { value: "latest", label: "Newest" },
   { value: "price-asc", label: "Price: Low to High" },
   { value: "price-desc", label: "Price: High to Low" },
-  { value: "popular", label: "Most Popular" },
-  { value: "rating", label: "Best Rating" },
+  { value: "name-asc", label: "Name: A to Z" },
+  { value: "name-desc", label: "Name: Z to A" },
+  { value: "updated-asc", label: "Updated: Oldest First" },
+  { value: "updated-desc", label: "Updated: Newest First" },
+  { value: "sellers-asc", label: "Sellers: Fewest First" },
+  { value: "sellers-desc", label: "Sellers: Most First" },
 ];
 
 // Items per page
