@@ -153,7 +153,7 @@ const AppContent = () => {
   return (
     <>
       <ToastDisplay />
-      <Router basename="/">
+      <Router basename="/cbikes">
         <PageLayout>
           <PageContent hasCart={shoppingCart.length > 0}>
             <Routes>
