@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="04996763-c414-4992-aa80-72c4031255e6" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../backend/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/config/database.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/dist/config/database.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/config/database.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/config/database.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/config/initDB.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/dist/config/initDB.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/config/initDB.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/config/initDB.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/index.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/dist/index.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/index.d.ts.map" beforeDir="false" afterPath="$PROJECT_DIR$/dist/index.d.ts.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/index.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/dist/index.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/routes/listings.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/dist/routes/listings.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/routes/listings.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/routes/listings.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/routes/products.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/dist/routes/products.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/routes/products.d.ts.map" beforeDir="false" afterPath="$PROJECT_DIR$/dist/routes/products.d.ts.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/routes/products.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/routes/products.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/routes/products.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/dist/routes/products.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/seed/seedData.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/dist/seed/seedData.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/seed/seedData.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/seed/seedData.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/types/index.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/dist/types/index.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/types/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/types/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/routes/products.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/products.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/common/constants.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../src/common/constants.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/common/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../src/common/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/components/bikesGrid/BikesGrid.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../src/components/bikesGrid/BikesGrid.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/components/header/ProductDetail.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../src/components/header/ProductDetail.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/components/priceComparison/PriceComparison.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../src/components/priceComparison/PriceComparison.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/hooks/sorting.hook.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../src/hooks/sorting.hook.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/services/bikeService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../src/services/bikeService.ts" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;TrungKienNguyenHuu&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/TrungKienNguyenHuu/cbikes-main.git&quot;,
+    &quot;accountId&quot;: &quot;2b1a4743-aec4-48d1-96e1-4cc4c3b62cd3&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="3ExcGSysHqdFLSjA9ZFL1fTlNMF" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;local&quot;,
+    &quot;javascript.preferred.runtime.type.id&quot;: &quot;node&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_interpreter_path&quot;: &quot;C:/Users/Magie Nguyen/AppData/Roaming/JetBrains/WebStorm2026.1/node/versions/24.15.0/node&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;C:\\Users\\Magie Nguyen\\AppData\\Roaming\\JetBrains\\WebStorm2026.1\\node\\versions\\24.15.0\\npm.cmd&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.javascript.runtime&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\Magie Nguyen\\Downloads\\cbikes-main\\api\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-WS-261.25134.101" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="04996763-c414-4992-aa80-72c4031255e6" name="Changes" comment="" />
+      <created>1781123565829</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1781123565829</updated>
+      <workItem from="1781123567109" duration="2396000" />
+      <workItem from="1781126951559" duration="2600000" />
+      <workItem from="1781147378544" duration="1385000" />
+      <workItem from="1781193187706" duration="1950000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
