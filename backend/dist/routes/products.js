@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const database_1 = __importDefault(require("../config/database"));
 const router = (0, express_1.Router)();
+// Helper function to extract unique sellers from listings
 const extractSellersFromListings = (listings) => {
     const sellerMap = new Map();
     listings.forEach((listing) => {
@@ -20,6 +21,7 @@ const extractSellersFromListings = (listings) => {
                 });
             }
             else {
+                // Keep the minimum price for this seller
                 const existing = sellerMap.get(platformId);
                 if (listing.price < existing.price) {
                     existing.price = listing.price;
@@ -30,7 +32,7 @@ const extractSellersFromListings = (listings) => {
     });
     return Array.from(sellerMap.values());
 };
-// GET all products with their listings and brand info
+// GET all products with their listings and brand info, including price history
 router.get("/", async (req, res) => {
     try {
         const query = `
@@ -48,7 +50,7 @@ router.get("/", async (req, res) => {
         b.slug as brand_slug,
         b.logo_url as brand_logo_url,
         b.description as brand_description,
-        json_agg(
+        COALESCE(json_agg(
           json_build_object(
             'listing_id', pl.listing_id,
             'product_id', pl.product_id,
@@ -65,13 +67,24 @@ router.get("/", async (req, res) => {
               'slug', plat.slug,
               'logo_url', plat.logo_url,
               'is_marketplace', plat.is_marketplace
-            )
+            ),
+            'priceHistory', COALESCE(ph_data.price_history, '[]'::json)
           ) ORDER BY pl.price ASC
-        ) FILTER (WHERE pl.listing_id IS NOT NULL) as listings
+        ) FILTER (WHERE pl.listing_id IS NOT NULL), '[]'::json) as listings
       FROM products p
       LEFT JOIN brands b ON p.brand_id = b.brand_id
       LEFT JOIN product_listings pl ON p.product_id = pl.product_id
       LEFT JOIN platforms plat ON pl.platform_id = plat.platform_id
+      LEFT JOIN LATERAL (
+        SELECT json_agg(
+          json_build_object(
+            'date', recorded_at::date,
+            'price', price
+          ) ORDER BY recorded_at
+        ) as price_history
+        FROM price_history
+        WHERE listing_id = pl.listing_id
+      ) ph_data ON TRUE
       GROUP BY p.product_id, p.brand_id, p.name, p.slug, p.image_url, p.description, p.specifications, p.created_at,
                b.brand_id, b.name, b.slug, b.logo_url, b.description
       ORDER BY p.created_at DESC
@@ -108,7 +121,7 @@ router.get("/", async (req, res) => {
         res.status(500).json({ error: "Failed to fetch products" });
     }
 });
-// GET product by ID with listings and brand info
+// GET product by ID with listings and brand info, including price history
 router.get("/:productId", async (req, res) => {
     try {
         const { productId } = req.params;
@@ -127,7 +140,7 @@ router.get("/:productId", async (req, res) => {
         b.slug as brand_slug,
         b.logo_url as brand_logo_url,
         b.description as brand_description,
-        json_agg(
+        COALESCE(json_agg(
           json_build_object(
             'listing_id', pl.listing_id,
             'product_id', pl.product_id,
@@ -144,13 +157,24 @@ router.get("/:productId", async (req, res) => {
               'slug', plat.slug,
               'logo_url', plat.logo_url,
               'is_marketplace', plat.is_marketplace
-            )
+            ),
+            'priceHistory', COALESCE(ph_data.price_history, '[]'::json)
           ) ORDER BY pl.price ASC
-        ) FILTER (WHERE pl.listing_id IS NOT NULL) as listings
+        ) FILTER (WHERE pl.listing_id IS NOT NULL), '[]'::json) as listings
       FROM products p
       LEFT JOIN brands b ON p.brand_id = b.brand_id
       LEFT JOIN product_listings pl ON p.product_id = pl.product_id
       LEFT JOIN platforms plat ON pl.platform_id = plat.platform_id
+      LEFT JOIN LATERAL (
+        SELECT json_agg(
+          json_build_object(
+            'date', recorded_at::date,
+            'price', price
+          ) ORDER BY recorded_at
+        ) as price_history
+        FROM price_history
+        WHERE listing_id = pl.listing_id
+      ) ph_data ON TRUE
       WHERE p.product_id = $1
       GROUP BY p.product_id, p.brand_id, p.name, p.slug, p.image_url, p.description, p.specifications, p.created_at,
                b.brand_id, b.name, b.slug, b.logo_url, b.description

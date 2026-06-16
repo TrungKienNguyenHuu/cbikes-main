@@ -20,7 +20,7 @@ app.use((req, res, next) => {
     console.log("URL:", req.url);
     next();
 });
-app.get("/test", (req, res) => {
+app.get("/", (req, res) => {
     res.json({ success: true });
 });
 // Test database connection

@@ -42,8 +42,14 @@ export interface PriceHistory {
     price: number;
     recorded_at: Date;
 }
+export interface Seller {
+    name: string;
+    price: number;
+    url: string;
+}
 export interface ProductWithListings extends Product {
     listings: ProductListing[];
+    sellers?: Seller[];
 }
 export interface ListingWithPriceHistory extends ProductListing {
     priceHistory?: PriceHistory[];
