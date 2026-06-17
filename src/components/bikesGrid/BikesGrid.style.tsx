@@ -7,7 +7,8 @@ export const StyledBikesGrid = styled.div`
   gap: ${SPACING.md};
   margin-top: ${SPACING.md};
   flex: 1;
-  align-items: stretch; /* FORCES all cards in a row to have equal height */
+  align-items: stretch; /* Keeps cards in the same row equal height */
+  align-content: start; /* NEW: Prevents a single row from stretching to fill the entire page height */
     
   @media (max-width: ${BREAKPOINTS.tablet}) {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -24,7 +25,7 @@ export const StyledBikeCard = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
-  height: 100%; /* ENSURES the card fills the stretched grid cell */
+  height: 100%;
   background-color: ${COLORS.background};
   border: 2px solid ${COLORS.borderLight};
   border-radius: 12px;
@@ -210,13 +211,13 @@ export const StyledDiscountBadge = styled.div`
 
 export const StyledPriceContainer = styled.div`
   display: flex;
-  flex-direction: row; /* Keep elements side-by-side */
-  justify-content: space-between; /* Pushes the red badge to the right edge */
+  flex-direction: row; 
+  justify-content: space-between; 
   align-items: flex-start;
   gap: ${SPACING.xs};
   margin-top: auto;
   width: 100%;
-  min-height: 52px; /* RESERVES SPACE for the 2-line discounted price */
+  min-height: 52px; 
 `;
 
 export const StyledOriginalPrice = styled.span`
