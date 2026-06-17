@@ -21,19 +21,20 @@ const DropdownContainer = styled.div`
 
 const DropdownButton = styled.button<{ isOpen: boolean }>`
   width: 100%;
-  padding: ${SPACING.sm} ${SPACING.md};
+  padding: 0.45rem 0.6rem;
   background-color: ${COLORS.backgroundLight};
-  border: 2px solid ${COLORS.border};
-  border-radius: 8px;
+  border: 1px solid ${COLORS.border};
+  border-radius: 6px;
   color: ${COLORS.text};
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: ${SPACING.sm};
+  gap: ${SPACING.xs};
   transition: all 0.3s ease;
-  font-size: 0.95rem;
+  font-size: 0.78rem;
+  line-height: 1.25;
 
   &:hover {
     border-color: ${COLORS.primary};
@@ -68,9 +69,9 @@ const DropdownMenu = styled.div<{ isOpen: boolean }>`
   background: white;
   border: 2px solid ${COLORS.primary};
   border-radius: 8px;
-  max-height: 300px;
+  max-height: min(300px, 50vh);
   overflow-y: auto;
-  z-index: 1000;
+  z-index: 1100;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   display: ${({ isOpen }) => (isOpen ? "block" : "none")};
   margin-top: 4px;

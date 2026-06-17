@@ -24,6 +24,11 @@ export interface Product {
     created_at: Date;
     brand?: Brand;
 }
+export interface Promotion {
+    title: string;
+    description?: string;
+    discountPercentage?: number;
+}
 export interface ProductListing {
     listing_id: string;
     product_id: string;
@@ -34,6 +39,8 @@ export interface ProductListing {
     image_url?: string;
     first_seen: Date;
     last_updated: Date;
+    discount_rate?: number;
+    promotions?: Promotion[];
     platform?: Platform;
 }
 export interface PriceHistory {
@@ -46,6 +53,8 @@ export interface Seller {
     name: string;
     price: number;
     url: string;
+    discount_rate?: number;
+    promotions?: Promotion[];
 }
 export interface ProductWithListings extends Product {
     listings: ProductListing[];

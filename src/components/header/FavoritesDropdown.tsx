@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { IMG_PATH, COLORS, SPACING, SHADOWS } from "../../common/constants";
 import { Bike } from "../../common/types";
+import { DiscountedPriceDisplay } from "../common/DiscountedPriceDisplay";
+import { getLowestPrice, getLowestPriceDiscount } from "../../utils/sellerPricing";
 
 const Dropdown = styled.div`
   position: absolute;
@@ -132,7 +134,15 @@ export const FavoritesDropdown = memo(
               </FavoriteImage>
               <FavoriteInfo>
                 <FavoriteName>{bike.name}</FavoriteName>
-                <FavoritePrice>${bike.price}</FavoritePrice>
+                <FavoritePrice>
+                  <DiscountedPriceDisplay
+                    price={getLowestPrice(bike.sellers, bike.price)}
+                    discountRate={getLowestPriceDiscount(bike.sellers)}
+                    size="sm"
+                    color={COLORS.primary}
+                    layout="vertical"
+                  />
+                </FavoritePrice>
               </FavoriteInfo>
             </FavoriteItem>
           ))

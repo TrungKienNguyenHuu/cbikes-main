@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import styled from "styled-components";
 import { Header } from "./components/header/Header";
-import { Filter } from "./components/filter/Filter";
+import { Filter, FilterSection, FilterSectionTitle } from "./components/filter/Filter";
 import { BikesGrid } from "./components/bikesGrid/BikesGrid";
 import { CategoryButtonsGroup } from "./components/categoryButtonsGroup/CategoryButtonsGroup";
 import { BrandFilterDropdown } from "./components/filter/BrandFilterDropdown";
@@ -13,7 +13,7 @@ import { PriceComparison } from "./components/priceComparison/PriceComparison";
 import { useFilter } from "./hooks/filter.hook";
 import { useShoppingCart } from "./hooks/shoppingCart.hook";
 import { useFavorites } from "./hooks/favorites.hook";
-import { WEB_APP_NAME, COLORS, SPACING, BREAKPOINTS } from "./common/constants";
+import { WEB_APP_NAME, COLORS, SPACING, BREAKPOINTS, BIKE_NEEDS_OPTIONS, BIKE_TIER_OPTIONS } from "./common/constants";
 import { ToastProvider } from "./context/ToastContext";
 import { ToastDisplay } from "./components/toast/ToastDisplay";
 import { HeroSection } from "./components/hero/HeroSection";
@@ -23,9 +23,10 @@ import { Footer } from "./components/footer/Footer";
 
 const AppContainer = styled.div`
   display: flex;
-  gap: 1.5rem;
-  padding: 1.5rem;
-  max-width: 1400px;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  width: 100%;
+  max-width: min(100%, 1800px);
   margin: 0 auto;
 
   @media (max-width: 768px) {
@@ -126,12 +127,16 @@ export const App = () => {
 
 const AppContent = () => {
   const {
-    filterState: { currentCategory, maxPrice, currentSeller },
+    filterState: { currentCategory, minPrice, maxPrice, pricePreset, currentSeller, currentNeed, currentTier },
     filteredBikesList,
     paginatedBikes,
     handleCurrentCategory,
+    handlePricePreset,
+    handleMinPrice,
     handleMaxPrice,
     handleCurrentSeller,
+    handleCurrentNeed,
+    handleCurrentTier,
     isLoading,
     error,
     searchTerm,
@@ -170,25 +175,51 @@ const AppContent = () => {
                     <HeroSection />
                     <AppContainer>
                       <Filter>
-                        <div>
-                          <h4 style={{ margin: "0 0 10px 0" }}>Brand</h4>
+                        <FilterSection>
+                          <FilterSectionTitle>Brand</FilterSectionTitle>
                           <BrandFilterDropdown
                             items={dynamicCategories}
                             currentValue={currentCategory}
                             onChange={handleCurrentCategory}
                             placeholder="Select a brand"
                           />
-                        </div>
-                        <div style={{ marginTop: "20px" }}>
-                          <h4 style={{ margin: "0 0 10px 0" }}>Store</h4>
+                        </FilterSection>
+                        <FilterSection>
+                          <FilterSectionTitle>Store</FilterSectionTitle>
                           <CategoryButtonsGroup
                               categories={dynamicSellers}
                               currentCategory={currentSeller}
                               handleCurrentCategory={handleCurrentSeller}
+                              compact
                           />
-                        </div>
-                        <PriceControl maxPrice={maxPrice} handleMaxPrice={handleMaxPrice} />
-                        <div style={{ marginTop: "20px" }}>
+                        </FilterSection>
+                        <FilterSection>
+                          <FilterSectionTitle>Need</FilterSectionTitle>
+                          <CategoryButtonsGroup
+                              categories={BIKE_NEEDS_OPTIONS}
+                              currentCategory={currentNeed || "all"}
+                              handleCurrentCategory={handleCurrentNeed}
+                              compact
+                          />
+                        </FilterSection>
+                        <FilterSection>
+                          <FilterSectionTitle>Tier</FilterSectionTitle>
+                          <CategoryButtonsGroup
+                              categories={BIKE_TIER_OPTIONS}
+                              currentCategory={currentTier || "all"}
+                              handleCurrentCategory={handleCurrentTier}
+                              compact
+                          />
+                        </FilterSection>
+                        <PriceControl
+                          minPrice={minPrice}
+                          maxPrice={maxPrice}
+                          pricePreset={pricePreset}
+                          onPresetChange={handlePricePreset}
+                          onMinPriceChange={handleMinPrice}
+                          onMaxPriceChange={handleMaxPrice}
+                        />
+                        <div>
                           <ResetButton type="button" onClick={resetFilters}>↻ Reset Filters</ResetButton>
                         </div>
                       </Filter>
@@ -249,7 +280,7 @@ const AppContent = () => {
                       searchTerm={searchTerm}
                       onSearch={handleSearch}
                     />
-                    <ProductDetail />
+                    <ProductDetail addBikeToCart={addBikeToCart} />
                   </>
                 }
               />

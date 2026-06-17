@@ -1,4 +1,4 @@
-import { Bike } from "../common/types";
+import {Bike, CategoryAll} from "../common/types";
 
 interface BikeFromAPI {
   id: string;
@@ -142,7 +142,7 @@ const transformProductToBike = (product: ProductFromAPI): Bike | null => {
     }
 
     // Extract category from brand name if available
-    const category = product.brand ? normalizeCategory(product.brand.slug) : Category.all;
+    const category = product.brand ? normalizeCategory(product.brand.slug) : CategoryAll;
 
     const bike: Bike = {
       id: product.product_id,

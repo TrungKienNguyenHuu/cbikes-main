@@ -46,6 +46,8 @@ interface ProductListing {
   image_url?: string;
   first_seen: string;
   last_updated: string;
+  discount_rate?: number;
+  promotions?: Array<{ title: string; description?: string; discountPercentage?: number }>;
   platform?: PlatformInfo;
   priceHistory?: Array<{ date: string; price: number }>;
 }
@@ -75,6 +77,9 @@ const mergeSellers = (
       name,
       price: seller.price,
       url: seller.url,
+      ...(seller.discountRate !== undefined && { discountRate: seller.discountRate }),
+      ...(seller.discount_rate !== undefined && !seller.discountRate && { discountRate: seller.discount_rate }),
+      ...(seller.promotions && seller.promotions.length > 0 && { promotions: seller.promotions }),
     };
     const key = name.toLowerCase();
     const existing = sellersByName.get(key);
@@ -91,10 +96,20 @@ const getSellersFromListings = (listings: ProductListing[]): Seller[] => {
   const sellers = listings.map((listing) => {
     const platformName = listing.platform?.name || listing.platform_id || "Unknown Platform";
 
+    if (listing.discount_rate || listing.promotions) {
+      console.log(`💰 Listing for ${platformName}:`, {
+        price: listing.price,
+        discount_rate: listing.discount_rate,
+        promotions: listing.promotions
+      });
+    }
+
     return {
       name: platformName,
       price: listing.price,
       url: listing.url,
+      ...(listing.discount_rate !== undefined && { discountRate: listing.discount_rate }),
+      ...(listing.promotions && listing.promotions.length > 0 && { promotions: listing.promotions }),
     };
   });
 
@@ -200,24 +215,28 @@ const keepLowestPricePerName = (bikes: Bike[]): Bike[] => {
     const existing = bikesByName.get(key);
 
     if (!existing) {
-      bikesByName.set(key, {
+      const enrichedBike = enrichBikeWithClassifications({
         ...bike,
         sellers: mergeSellers([], bike.sellers),
         priceHistory: mergePriceHistory([], bike.priceHistory),
       });
+      bikesByName.set(key, enrichedBike);
       return;
     }
 
     const lowerPriceBike = bike.price < existing.price ? bike : existing;
 
-    bikesByName.set(key, {
+    const mergedBike = {
       ...lowerPriceBike,
       description: lowerPriceBike.description || existing.description || bike.description,
       specifications: lowerPriceBike.specifications || existing.specifications || bike.specifications,
       sellers: mergeSellers(existing.sellers, bike.sellers),
       lastUpdated: getLatestDate(existing.lastUpdated, bike.lastUpdated),
       priceHistory: mergePriceHistory(existing.priceHistory, bike.priceHistory),
-    });
+    };
+
+    const enrichedBike = enrichBikeWithClassifications(mergedBike);
+    bikesByName.set(key, enrichedBike);
   });
 
   return Array.from(bikesByName.values());
@@ -277,6 +296,91 @@ const keepLowestPricePerName = (bikes: Bike[]): Bike[] => {
 // };
 
 /**
+ * Classify bike into tier based on price
+ * Tier categories based on user's Vietnamese classification:
+ * - Basic/Phổ thông: < 20M VND
+ * - Mid-tier/Trung cấp: 20M - 40M VND  
+ * - Premium/Cao cấp: >= 40M VND
+ */
+const classifyTier = (price: number): string => {
+  if (price < 20000000) return "basic";
+  if (price < 40000000) return "mid";
+  return "premium";
+};
+
+/**
+ * Classify bike into need category based on specifications
+ * Need categories based on user personas:
+ * - students: Entry-level, good range, affordable
+ * - office: Comfortable, moderate range, good brakes
+ * - tech: High-tech features, smart integration
+ * - delivery: Cargo space, strong motor, fast
+ */
+const classifyNeed = (specs: Record<string, any> = {}): string => {
+  const motorPower = parseInt(specs.motorPower?.toString().replace(/\D/g, "") || "0");
+  const maxSpeed = parseInt(specs.maxSpeed?.toString().replace(/\D/g, "") || "0");
+  const batteryCapacity = specs.batteryCapacity?.toString().toLowerCase() || "";
+  const range = parseInt(specs.range?.toString().replace(/\D/g, "") || "0");
+  const weight = parseInt(specs.weight?.toString().replace(/\D/g, "") || "0");
+  const name = specs.productName?.toString().toLowerCase() || "";
+
+  // Check for delivery/cargo indicators
+  if (
+    weight > 40 ||
+    motorPower > 3000 ||
+    maxSpeed > 60 ||
+    name.includes("cargo") ||
+    name.includes("delivery") ||
+    name.includes("truck")
+  ) {
+    return "delivery";
+  }
+
+  // Check for tech enthusiast indicators
+  if (
+    batteryCapacity.includes("ai") ||
+    batteryCapacity.includes("smart") ||
+    specs.hasSmartFeatures ||
+    specs.hasGPS ||
+    specs.hasApp
+  ) {
+    return "tech";
+  }
+
+  // Check for office worker indicators
+  if (range >= 100 && maxSpeed <= 40 && motorPower <= 2000) {
+    return "office";
+  }
+
+  // Default to students (entry-level, affordable)
+  return "students";
+};
+
+/**
+ * Ensure bike has need and tier specifications
+ */
+const enrichBikeWithClassifications = (bike: Bike): Bike => {
+  if (!bike.specifications) {
+    bike.specifications = {};
+  }
+
+  if (!bike.specifications.tier) {
+    bike.specifications.tier = classifyTier(bike.price);
+  }
+
+  if (!bike.specifications.need) {
+    // Pass price to need classifier for better classification
+    const specsWithPrice = {
+      ...bike.specifications,
+      productName: bike.name,
+    };
+    bike.specifications.need = classifyNeed(specsWithPrice);
+  }
+
+  return bike;
+};
+
+/**
  * Transform product from API to Bike format
  * Takes the first (lowest price) listing from a product
  * Includes all listings as sellers
@@ -326,7 +430,7 @@ const transformProductToBike = (product: ProductFromAPI): Bike | null => {
       .map(([date, price]) => ({ date, price }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    const bike: Bike = {
+    let bike: Bike = {
       id: product.product_id,
       name: product.name,
       price: lowestPriceListing.price,
@@ -341,9 +445,13 @@ const transformProductToBike = (product: ProductFromAPI): Bike | null => {
       priceHistory: priceHistory.length > 0 ? priceHistory : undefined,
     };
 
+    // Enrich bike with tier and need classifications
+    bike = enrichBikeWithClassifications(bike);
+
     console.log(`📦 Transformed product to bike with ${sellers.length} sellers and ${priceHistory.length} price history points:`, bike);
     console.log(`📋 Sellers detail:`, sellers);
     console.log(`📈 Price history:`, priceHistory);
+    console.log(`🔍 Classifications - Tier: ${bike.specifications?.tier}, Need: ${bike.specifications?.need}`);
     return bike;
   } catch (error) {
     console.error(`❌ Error transforming product ${product.name}:`, error);

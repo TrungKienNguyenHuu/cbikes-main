@@ -1,5 +1,7 @@
 import styled from "styled-components";
 import { PriceHistoryPoint } from "../../common/types";
+import { formatVNDLabel } from "../../utils/formatPrice";
+import { PriceDisplay } from "../common/PriceDisplay";
 
 const ChartContainer = styled.div`
   background-color: #f9f9f9;
@@ -109,8 +111,8 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
     }
   };
 
-  // Format price
-  const formatPrice = (price: number) => `₫${price.toLocaleString()}`;
+  // Format price for chart axis labels
+  const formatAxisPrice = (price: number) => formatVNDLabel(price);
 
   return (
     <ChartContainer>
@@ -144,7 +146,7 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
                   fontSize="12"
                   fill="#999"
                 >
-                  {formatPrice(price)}
+                  {formatAxisPrice(price)}
                 </text>
               </g>
             );
@@ -248,14 +250,14 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
 
       <div style={{ marginTop: "1rem", fontSize: "0.9rem", color: "#666" }}>
         <div>Data points: {priceHistory.length}</div>
-        <div>
-          Lowest: <strong>{formatPrice(minPrice)}</strong>
+        <div style={{ display: "flex", alignItems: "baseline", gap: "0.35rem" }}>
+          Lowest: <PriceDisplay price={minPrice} size="sm" as="span" />
         </div>
-        <div>
-          Highest: <strong>{formatPrice(maxPrice)}</strong>
+        <div style={{ display: "flex", alignItems: "baseline", gap: "0.35rem" }}>
+          Highest: <PriceDisplay price={maxPrice} size="sm" as="span" />
         </div>
-        <div>
-          Current: <strong>{formatPrice(currentPrice)}</strong>
+        <div style={{ display: "flex", alignItems: "baseline", gap: "0.35rem" }}>
+          Current: <PriceDisplay price={currentPrice} size="sm" as="span" />
         </div>
       </div>
     </ChartContainer>

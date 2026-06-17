@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { Bike } from "../common/types";
+import { getLowestPriceDiscount } from "../utils/sellerPricing";
 
-export type SortType = "latest" | "price-asc" | "price-desc" | "name-asc" | "name-desc" | "updated-asc" | "updated-desc" | "sellers-asc" | "sellers-desc";
+export type SortType = "price-asc" | "price-desc" | "name-asc" | "name-desc" | "updated-asc" | "updated-desc" | "sellers-asc" | "sellers-desc" | "discount-asc" | "discount-desc";
 
 export const useSorting = (bikes: Bike[], sortType: SortType) => {
   return useMemo(() => {
@@ -13,10 +14,6 @@ export const useSorting = (bikes: Bike[], sortType: SortType) => {
 
       case "price-desc":
         return sortedBikes.sort((a, b) => b.price - a.price);
-
-      case "latest":
-        // Assuming newer bikes come later in the array, so reverse order
-        return sortedBikes.reverse();
 
       case "name-asc":
         return sortedBikes.sort((a, b) => a.name.localeCompare(b.name));
@@ -50,6 +47,20 @@ export const useSorting = (bikes: Bike[], sortType: SortType) => {
           const sellersA = a.sellers ? a.sellers.length : 0;
           const sellersB = b.sellers ? b.sellers.length : 0;
           return sellersB - sellersA;
+        });
+
+      case "discount-asc":
+        return sortedBikes.sort((a, b) => {
+          const discountA = getLowestPriceDiscount(a.sellers);
+          const discountB = getLowestPriceDiscount(b.sellers);
+          return discountA - discountB;
+        });
+
+      case "discount-desc":
+        return sortedBikes.sort((a, b) => {
+          const discountA = getLowestPriceDiscount(a.sellers);
+          const discountB = getLowestPriceDiscount(b.sellers);
+          return discountB - discountA;
         });
 
       default:

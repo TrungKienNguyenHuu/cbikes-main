@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { DEFAULT_MAX_PRICE } from "../common/constants";
+import { DEFAULT_MAX_PRICE, DEFAULT_MIN_PRICE, PRICE_RANGE_PRESETS } from "../common/constants";
 import { Bike, CategoryAll, FilterState } from "../common/types";
 import { fetchBikesFromAPI } from "../services/bikeService";
 import { useSorting, SortType } from "./sorting.hook";
@@ -8,15 +8,19 @@ import { useSearch } from "./search.hook";
 export const useFilter = () => {
   const [filterState, setFilterState] = useState<FilterState>({
     currentCategory: "all",
+    minPrice: DEFAULT_MIN_PRICE,
     maxPrice: DEFAULT_MAX_PRICE,
-    currentSeller: "all", // 👈 Ensure this matches your FilterState type
+    pricePreset: "all",
+    currentSeller: "all",
+    currentNeed: "all",
+    currentTier: "all",
   });
 
   const [bikesList, setBikesList] = useState<Bike[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortType, setSortType] = useState<SortType>("latest");
+  const [sortType, setSortType] = useState<SortType>("updated-asc");
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -85,22 +89,39 @@ export const useFilter = () => {
   const filteredBikesList = useMemo(
       () =>
           sortedBikes.filter((bike) => {
-            const matchesPrice = bike.price <= filterState.maxPrice;
+            const matchesPrice =
+                bike.price >= filterState.minPrice &&
+                bike.price <= filterState.maxPrice;
 
             const matchesCategory =
                 filterState.currentCategory === "all" ||
                 bike.category.toLowerCase() === filterState.currentCategory.toLowerCase();
 
-            // 👇 NEW: Check if the bike has a seller that matches the selected seller 👇
             const matchesSeller =
                 filterState.currentSeller === "all" ||
                 (bike.sellers && bike.sellers.some(
                     (s) => s.name.toLowerCase() === filterState.currentSeller.toLowerCase()
                 ));
 
-            return matchesPrice && matchesCategory && matchesSeller;
+            // Check need filter (phân loại theo nhu cầu)
+            const matchesNeed =
+                filterState.currentNeed === "all" || 
+                !filterState.currentNeed ||
+                (bike.specifications && 
+                 bike.specifications.need && 
+                 bike.specifications.need.toLowerCase() === filterState.currentNeed?.toLowerCase());
+
+            // Check tier filter (phân loại theo phân khúc)
+            const matchesTier =
+                filterState.currentTier === "all" || 
+                !filterState.currentTier ||
+                (bike.specifications && 
+                 bike.specifications.tier && 
+                 bike.specifications.tier.toLowerCase() === filterState.currentTier?.toLowerCase());
+
+            return matchesPrice && matchesCategory && matchesSeller && matchesNeed && matchesTier;
           }),
-      [filterState.currentCategory, filterState.maxPrice, filterState.currentSeller, sortedBikes]
+      [filterState.currentCategory, filterState.minPrice, filterState.maxPrice, filterState.currentSeller, filterState.currentNeed, filterState.currentTier, sortedBikes]
   );
 
   // Pagination
@@ -128,13 +149,59 @@ export const useFilter = () => {
       []
   );
 
-  const handleMaxPrice = useCallback(
-      (maxPrice: string) => {
-        setFilterState((prev) => ({ ...prev, maxPrice: Number(maxPrice) }));
-        setCurrentPage(1); // Reset to first page when price changes
+  const handleCurrentNeed = useCallback(
+      (needId: string) => {
+        setFilterState((prev) => ({ ...prev, currentNeed: needId }));
+        setCurrentPage(1); // Reset to first page when need changes
       },
       []
   );
+
+  const handleCurrentTier = useCallback(
+      (tierId: string) => {
+        setFilterState((prev) => ({ ...prev, currentTier: tierId }));
+        setCurrentPage(1); // Reset to first page when tier changes
+      },
+      []
+  );
+
+  const handlePricePreset = useCallback((presetId: string) => {
+    if (presetId === "custom") {
+      setFilterState((prev) => ({ ...prev, pricePreset: "custom" }));
+      setCurrentPage(1);
+      return;
+    }
+
+    const preset = PRICE_RANGE_PRESETS.find((item) => item.id === presetId);
+
+    if (preset) {
+      setFilterState((prev) => ({
+        ...prev,
+        pricePreset: presetId,
+        minPrice: preset.min,
+        maxPrice: preset.max,
+      }));
+      setCurrentPage(1);
+    }
+  }, []);
+
+  const handleMinPrice = useCallback((minPrice: number) => {
+    setFilterState((prev) => ({
+      ...prev,
+      pricePreset: "custom",
+      minPrice: Math.min(minPrice, prev.maxPrice),
+    }));
+    setCurrentPage(1);
+  }, []);
+
+  const handleMaxPrice = useCallback((maxPrice: number) => {
+    setFilterState((prev) => ({
+      ...prev,
+      pricePreset: "custom",
+      maxPrice: Math.max(maxPrice, prev.minPrice),
+    }));
+    setCurrentPage(1);
+  }, []);
 
   const handleSearch = useCallback((term: string) => {
     setSearchTerm(term);
@@ -154,11 +221,15 @@ export const useFilter = () => {
   const resetFilters = useCallback(() => {
     setFilterState({
       currentCategory: "all",
+      minPrice: DEFAULT_MIN_PRICE,
       maxPrice: DEFAULT_MAX_PRICE,
-      currentSeller: "all", // 👈 Ensure seller resets to "all"
+      pricePreset: "all",
+      currentSeller: "all",
+      currentNeed: "all",
+      currentTier: "all",
     });
     setSearchTerm("");
-    setSortType("latest");
+    setSortType("updated-asc");
     setCurrentPage(1);
   }, []);
 
@@ -167,9 +238,13 @@ export const useFilter = () => {
     filteredBikesList,
     paginatedBikes,
     dynamicCategories,
-    dynamicSellers, // 👈 Export the sellers array
+    dynamicSellers,
     handleCurrentCategory,
-    handleCurrentSeller, // 👈 Export the seller handler
+    handleCurrentSeller,
+    handleCurrentNeed,
+    handleCurrentTier,
+    handlePricePreset,
+    handleMinPrice,
     handleMaxPrice,
     isLoading,
     error,

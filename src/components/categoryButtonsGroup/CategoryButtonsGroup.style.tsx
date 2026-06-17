@@ -1,10 +1,10 @@
 import styled from "styled-components";
 import { COLORS, SPACING, BREAKPOINTS } from "../../common/constants";
 
-export const StyledCategoryWrapper = styled.div`
+export const StyledCategoryWrapper = styled.div<{ $compact?: boolean }>`
   display: flex;
-  flex-direction: column;
-  gap: ${SPACING.sm};
+  flex-direction: ${({ $compact }) => ($compact ? "column" : "column")};
+  gap: ${({ $compact }) => ($compact ? "0.3rem" : SPACING.sm)};
   width: 100%;
 
   @media (max-width: ${BREAKPOINTS.tablet}) {
@@ -14,7 +14,7 @@ export const StyledCategoryWrapper = styled.div`
   }
 `;
 
-export const StyledCategoryItem = styled.div<{ isChecked: boolean }>`
+export const StyledCategoryItem = styled.div<{ isChecked: boolean; $compact?: boolean }>`
   display: flex;
   flex-grow: 1;
 
@@ -28,14 +28,18 @@ export const StyledCategoryItem = styled.div<{ isChecked: boolean }>`
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: ${SPACING.sm} ${SPACING.md};
+    padding: ${({ $compact }) =>
+      $compact ? "0.3rem 0.45rem" : `${SPACING.sm} ${SPACING.md}`};
     width: 100%;
     color: ${({ isChecked }) => (isChecked ? "white" : COLORS.text)};
     background-color: ${({ isChecked }) => (isChecked ? COLORS.primary : COLORS.backgroundLight)};
-    border: 2px solid ${({ isChecked }) => (isChecked ? COLORS.primary : COLORS.border)};
-    border-radius: 8px;
+    border: ${({ $compact }) => ($compact ? "1px" : "2px")} solid
+      ${({ isChecked }) => (isChecked ? COLORS.primary : COLORS.border)};
+    border-radius: ${({ $compact }) => ($compact ? "6px" : "8px")};
     cursor: pointer;
     font-weight: 600;
+    font-size: ${({ $compact }) => ($compact ? "0.74rem" : "inherit")};
+    line-height: 1.25;
     transition: all 0.3s ease;
     
     &:hover {

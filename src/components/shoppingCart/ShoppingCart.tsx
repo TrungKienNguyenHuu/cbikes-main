@@ -1,7 +1,9 @@
 import { memo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { IMG_PATH } from "../../common/constants";
+import { DiscountedPriceDisplay } from "../common/DiscountedPriceDisplay";
+import { COLORS, IMG_PATH } from "../../common/constants";
 import { Bike } from "../../common/types";
+import { getLowestPrice, getLowestPriceDiscount } from "../../utils/sellerPricing";
 import { useToast } from "../../context/ToastContext";
 import {
   StyledCartImg,
@@ -33,11 +35,20 @@ const ShoppingItem = memo(({ bike, removeBikeFromCart }: IShoppingItem) => {
       ? bike.imgSrc
       : `${IMG_PATH}${bike.imgSrc}`;
 
+  const lowestPrice = getLowestPrice(bike.sellers, bike.price);
+  const lowestPriceDiscount = getLowestPriceDiscount(bike.sellers);
+
   return (
     <StyledCartItem>
       <StyledTitle>
         <h5>{bike.name}</h5>
-        <span>{bike.price}$</span>
+        <DiscountedPriceDisplay
+          price={lowestPrice}
+          discountRate={lowestPriceDiscount}
+          size="sm"
+          color={COLORS.primary}
+          layout="vertical"
+        />
         <StyledDeleteButton onClick={() => removeBikeFromCart(bike.id)}>
           X
         </StyledDeleteButton>

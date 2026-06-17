@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useEffect, useState } from "react";
-/*import { fetchProductByIdFromTestBackend, formatVNDPrice, ProductFromTestAPI } from "../../services/productService";*/
+import { PriceDisplay } from "../common/PriceDisplay";
 
 const StyledDetailContainer = styled.div`
   padding: 2rem;
@@ -382,7 +382,7 @@ export const ProductDetailCopy = () => {
               {lowestPrice !== null && (
                 <>
                   <StyledPriceRange>
-                    Lowest Price: <strong>{formatVNDPrice(lowestPrice)}</strong>
+                    Lowest Price: <PriceDisplay price={lowestPrice} size="lg" color="#e74c3c" as="span" />
                   </StyledPriceRange>
                   <StyledListingsGrid>
                     {topListings.map((listing) => (
@@ -395,7 +395,9 @@ export const ProductDetailCopy = () => {
                           <StyledListingSource>{listing.source_name}</StyledListingSource>
                           <StyledListingTitle>{listing.listing_title}</StyledListingTitle>
                         </StyledListingLeft>
-                        <StyledListingPrice>{formatVNDPrice(listing.price)}</StyledListingPrice>
+                        <StyledListingPrice>
+                          <PriceDisplay price={listing.price} size="sm" color="#e74c3c" />
+                        </StyledListingPrice>
                       </StyledListingLink>
                     ))}
                   </StyledListingsGrid>
@@ -440,7 +442,9 @@ export const ProductDetailCopy = () => {
                 {product.listings.map((listing) => (
                   <StyledListingCard key={listing.listing_id}>
                     <StyledListingCardHeader>{listing.source_name}</StyledListingCardHeader>
-                    <StyledListingCardPrice>{formatVNDPrice(listing.price)}</StyledListingCardPrice>
+                    <StyledListingCardPrice>
+                      <PriceDisplay price={listing.price} size="md" color="#e74c3c" />
+                    </StyledListingCardPrice>
                     <StyledListingCardTitle>{listing.listing_title}</StyledListingCardTitle>
                     <StyledListingCardLink href="#" target="_blank" rel="noopener noreferrer">
                       View on {listing.source_name} →
@@ -458,10 +462,21 @@ export const ProductDetailCopy = () => {
         <p>
           This product is from the {product.brand} brand and has {product.listings?.length || 0} 
           active listings from various sellers. The price ranges from{" "}
-          {lowestPrice !== null ? formatVNDPrice(lowestPrice) : "N/A"} to{" "}
-          {product.listings && product.listings.length > 0
-            ? formatVNDPrice(Math.max(...product.listings.map((l) => l.price)))
-            : "N/A"}
+          {lowestPrice !== null ? (
+            <PriceDisplay price={lowestPrice} size="sm" as="span" />
+          ) : (
+            "N/A"
+          )}{" "}
+          to{" "}
+          {product.listings && product.listings.length > 0 ? (
+            <PriceDisplay
+              price={Math.max(...product.listings.map((l) => l.price))}
+              size="sm"
+              as="span"
+            />
+          ) : (
+            "N/A"
+          )}
           .
         </p>
       </StyledDescriptionSection>

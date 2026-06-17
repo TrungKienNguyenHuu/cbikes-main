@@ -13,10 +13,11 @@ interface IProps {
   categories?: CategoryItem[]; 
   currentCategory: string;
   handleCurrentCategory: (categoryId: string) => void;
+  compact?: boolean;
 }
 
 export const CategoryButtonsGroup = memo(
-  ({ categories = [], currentCategory, handleCurrentCategory }: IProps) => {
+  ({ categories = [], currentCategory, handleCurrentCategory, compact = false }: IProps) => {
     
     // 1. Automatically inject the "All" category at the start if it doesn't exist
     const displayCategories = categories.some((c) => c.id === "all")
@@ -35,7 +36,7 @@ export const CategoryButtonsGroup = memo(
     };
 
     return (
-      <StyledCategoryWrapper>
+      <StyledCategoryWrapper $compact={compact}>
         {/* 2. Map over our guaranteed displayCategories instead of the raw prop */}
         {displayCategories.map((category) => {
           const isChecked = category.id === currentCategory;
@@ -44,6 +45,7 @@ export const CategoryButtonsGroup = memo(
             <StyledCategoryItem
               key={category.id}
               isChecked={isChecked}
+              $compact={compact}
               onClick={() => handleCategoryClick(category.id)}
               title={isChecked && category.id !== "all" ? "Click again to deselect" : ""}
             >

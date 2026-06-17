@@ -10,6 +10,10 @@ export const useShoppingCart = () => {
 
   const addBikeToCart = useCallback(
     (bike: Bike) => {
+      if (shoppingCart.some((item) => item.id === bike.id)) {
+        addToast(`${bike.name} is already in compare`, "warning", 2000);
+        return;
+      }
       if (shoppingCart.length >= MAX_CART_ITEMS) {
         addToast(`Maximum ${MAX_CART_ITEMS} products allowed for comparison`, "warning", 2000);
         return;

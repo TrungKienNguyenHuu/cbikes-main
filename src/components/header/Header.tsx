@@ -5,13 +5,14 @@ import { Bike } from "../../common/types";
 import { FavoritesDropdown } from "./FavoritesDropdown";
 
 interface IHeaderProps {
-  title: string;
-  favorites?: Bike[];
-  searchTerm?: string;
-  onSearch?: (term: string) => void;
+    title: string;
+    favorites?: Bike[];
+    searchTerm?: string;
+    onSearch?: (term: string) => void;
 }
 
-const HeaderContainer = styled.header`
+// 1. Add transient prop type `$isHidden` so it doesn't get passed to the DOM
+const HeaderContainer = styled.header<{ $isHidden: boolean }>`
   background-color: ${COLORS.background};
   border-bottom: 2px solid ${COLORS.borderLight};
   padding: ${SPACING.md} ${SPACING.lg};
@@ -19,6 +20,10 @@ const HeaderContainer = styled.header`
   position: sticky;
   top: 0;
   z-index: 100;
+  
+  /* 2. Add transition and transform for smooth hiding/showing */
+  transition: transform 0.3s ease-in-out;
+  transform: translateY(${(props) => (props.$isHidden ? "-100%" : "0")});
 `;
 
 const HeaderContent = styled.div`
@@ -135,58 +140,83 @@ const BadgeCount = styled.span`
 `;
 
 export const Header = memo(
-  ({ title, favorites = [], searchTerm = "", onSearch }: IHeaderProps) => {
-    const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
-    const favoritesRef = useRef<HTMLDivElement>(null);
+    ({ title, favorites = [], searchTerm = "", onSearch }: IHeaderProps) => {
+        const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+        const [isHidden, setIsHidden] = useState(false); // State to handle visibility
 
-    useEffect(() => {
-      if (!isFavoritesOpen) return;
+        const favoritesRef = useRef<HTMLDivElement>(null);
+        const lastScrollY = useRef(0); // Track previous scroll position
 
-      const handleClickOutside = (event: MouseEvent) => {
-        if (
-          favoritesRef.current &&
-          !favoritesRef.current.contains(event.target as Node)
-        ) {
-          setIsFavoritesOpen(false);
-        }
-      };
+        // Handle Favorites dropdown clicking outside
+        useEffect(() => {
+            if (!isFavoritesOpen) return;
 
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [isFavoritesOpen]);
+            const handleClickOutside = (event: MouseEvent) => {
+                if (
+                    favoritesRef.current &&
+                    !favoritesRef.current.contains(event.target as Node)
+                ) {
+                    setIsFavoritesOpen(false);
+                }
+            };
 
-    return (
-      <HeaderContainer>
-        <HeaderContent>
-          <Logo>{title}</Logo>
-          <SearchContainer>
-            <SearchInput
-              type="text"
-              placeholder="Search bikes by name or specs..."
-              aria-label="Search bikes"
-              value={searchTerm}
-              onChange={(e) => onSearch?.(e.target.value)}
-            />
-            <SearchButton onClick={() => onSearch?.(searchTerm)}>Search</SearchButton>
-          </SearchContainer>
-          <FavoritesWrapper ref={favoritesRef}>
-            <CartBadge
-              type="button"
-              title="Favorite Products"
-              aria-label="Favorite products"
-              onClick={() => setIsFavoritesOpen((prev) => !prev)}
-            >
-              🛒
-              {favorites.length > 0 && <BadgeCount>{favorites.length}</BadgeCount>}
-            </CartBadge>
-            <FavoritesDropdown
-              favorites={favorites}
-              isOpen={isFavoritesOpen}
-              onClose={() => setIsFavoritesOpen(false)}
-            />
-          </FavoritesWrapper>
-        </HeaderContent>
-      </HeaderContainer>
-    );
-  }
+            document.addEventListener("mousedown", handleClickOutside);
+            return () => document.removeEventListener("mousedown", handleClickOutside);
+        }, [isFavoritesOpen]);
+
+        // Handle Scroll for Header visibility
+        useEffect(() => {
+            const handleScroll = () => {
+                const currentScrollY = window.scrollY;
+
+                // If scrolling down and past 80px, hide the header
+                if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
+                    setIsHidden(true);
+                } else if (currentScrollY < lastScrollY.current) {
+                    // If scrolling up, show the header
+                    setIsHidden(false);
+                }
+
+                lastScrollY.current = currentScrollY;
+            };
+
+            // Use passive: true for better scrolling performance
+            window.addEventListener("scroll", handleScroll, { passive: true });
+            return () => window.removeEventListener("scroll", handleScroll);
+        }, []);
+
+        return (
+            <HeaderContainer $isHidden={isHidden}>
+                <HeaderContent>
+                    <Logo>{title}</Logo>
+                    <SearchContainer>
+                        <SearchInput
+                            type="text"
+                            placeholder="Search bikes by name or specs..."
+                            aria-label="Search bikes"
+                            value={searchTerm}
+                            onChange={(e) => onSearch?.(e.target.value)}
+                        />
+                        <SearchButton onClick={() => onSearch?.(searchTerm)}>Search</SearchButton>
+                    </SearchContainer>
+                    <FavoritesWrapper ref={favoritesRef}>
+                        <CartBadge
+                            type="button"
+                            title="Favorite Products"
+                            aria-label="Favorite products"
+                            onClick={() => setIsFavoritesOpen((prev) => !prev)}
+                        >
+                            🛒
+                            {favorites.length > 0 && <BadgeCount>{favorites.length}</BadgeCount>}
+                        </CartBadge>
+                        <FavoritesDropdown
+                            favorites={favorites}
+                            isOpen={isFavoritesOpen}
+                            onClose={() => setIsFavoritesOpen(false)}
+                        />
+                    </FavoritesWrapper>
+                </HeaderContent>
+            </HeaderContainer>
+        );
+    }
 );

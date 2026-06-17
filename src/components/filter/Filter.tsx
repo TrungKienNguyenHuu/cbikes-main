@@ -1,21 +1,24 @@
 import { memo, ReactNode } from "react";
 import styled from "styled-components";
-import { COLORS, SHADOWS, SPACING, BREAKPOINTS } from "../../common/constants";
+import { COLORS, SHADOWS, SPACING, BREAKPOINTS, LAYOUT } from "../../common/constants";
 
 const StyledForm = styled.form`
   display: flex;
   flex-direction: column;
-  gap: ${SPACING.lg};
-  padding: ${SPACING.lg};
+  gap: ${SPACING.sm};
   background: ${COLORS.background};
   border: 2px solid ${COLORS.borderLight};
   border-radius: 12px;
   position: sticky;
-  top: ${SPACING.lg};
-  height: fit-content;
-  min-width: 280px;
+  top: ${LAYOUT.stickyHeaderOffset};
+  align-self: flex-start;
+  flex: 0 0 250px;
+  width: 250px;
+  padding: ${SPACING.md};
+  overflow: visible;
   box-shadow: ${SHADOWS.sm};
-  transition: all 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  z-index: 10;
 
   &:hover {
     border-color: ${COLORS.primary};
@@ -23,29 +26,45 @@ const StyledForm = styled.form`
   }
 
   @media (max-width: ${BREAKPOINTS.tablet}) {
-    flex-direction: column;
-    min-width: 100%;
+    flex: 1 1 auto;
+    width: 100%;
     position: static;
-    gap: ${SPACING.md};
   }
 `;
 
 const FilterTitle = styled.h3`
-  margin: 0 0 ${SPACING.md} 0;
+  margin: 0 0 ${SPACING.xs} 0;
   color: ${COLORS.text};
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   display: flex;
   align-items: center;
-  gap: ${SPACING.sm};
+  gap: ${SPACING.xs};
 
   &::before {
     content: "🔍";
-    font-size: 1.3rem;
+    font-size: 1.1rem;
   }
 `;
 
-export const Filter = memo(({ children }: { children: ReactNode }) => (
+export const FilterSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+`;
+
+export const FilterSectionTitle = styled.h4`
+  margin: 0;
+  color: ${COLORS.text};
+  font-size: 0.82rem;
+  font-weight: 700;
+`;
+
+interface FilterProps {
+  children: ReactNode;
+}
+
+export const Filter = memo(({ children }: FilterProps) => (
   <StyledForm>
     <FilterTitle>Filters</FilterTitle>
     {children}

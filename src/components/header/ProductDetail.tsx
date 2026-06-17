@@ -3,10 +3,10 @@ import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { Bike } from "../../common/types";
 import { fetchBikeByIdFromAPI } from "../../services/bikeService";
-import { useShoppingCart } from "../../hooks/shoppingCart.hook";
 import { getImageUrl, getPlaceholderImage } from "../../utils/imageLoader";
-import { uuid } from "../../utils/uuid";
+import { DiscountedPriceDisplay } from "../common/DiscountedPriceDisplay";
 import { PriceHistoryChart } from "../priceHistory/PriceHistoryChart";
+import { getLowestPrice, getLowestPriceDiscount, getSellerDiscount } from "../../utils/sellerPricing";
 
 /**
  * Unescape unicode escape sequences in JSON strings
@@ -33,22 +33,22 @@ const isHtmlContent = (text: string): boolean => {
  * Returns null if content is plain text
  */
 const extractHtmlContent = (html: string): string | null => {
-  // First unescape unicode sequences
+  // First unescape Unicode sequences
   const unescaped = unescapeUnicode(html);
-  
+
   const parser = new DOMParser();
   const doc = parser.parseFromString(unescaped, "text/html");
   const markdownPanel = doc.querySelector(".markdown-main-panel");
-  
+
   if (markdownPanel) {
     return markdownPanel.innerHTML;
   }
-  
+
   // If no markdown panel, but it's HTML-like, return the unescaped HTML
   if (/<[^>]+>/g.test(unescaped)) {
     return unescaped;
   }
-  
+
   // Otherwise return null to indicate it's plain text
   return null;
 };
@@ -123,10 +123,14 @@ const StyledTitle = styled.h1`
 const StyledPriceRange = styled.div`
   font-size: 1.5rem;
   color: #666;
-  
-  strong {
-    color: #e74c3c;
-    font-size: 2rem;
+  display: flex;
+  align-items: center; /* Aligns text nicely vertically */
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  /* Aggressively force identical text size for both discounted and original prices */
+  & * {
+    font-size: 1.5rem !important;
   }
 `;
 
@@ -339,14 +343,15 @@ const StyledActualSellersList = styled.div`
 const StyledActualSellerItem = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0.75rem;
+  align-items: flex-start;
+  padding: 0.75rem;
   background-color: white;
   border: 1px solid #d4edda;
   border-radius: 6px;
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  gap: 0.75rem;
 
   &:hover {
     background-color: #e8f5e9;
@@ -365,24 +370,32 @@ const StyledActualSellerName = styled.span`
 `;
 
 const StyledActualSellerPrice = styled.span`
-  color: #e74c3c;
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+
+  /* Force identical text size for seller pricing */
+  & * {
+    font-size: 1rem !important;
+  }
 `;
 
-export const ProductDetail = () => {
+interface ProductDetailProps {
+  addBikeToCart: (bike: Bike) => void;
+}
+
+export const ProductDetail = ({ addBikeToCart }: ProductDetailProps) => {
   const { productId } = useParams();
   const navigate = useNavigate();
-  const { addBikeToCart } = useShoppingCart();
-  
+
   const [product, setProduct] = useState<Bike | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
-  
+
 
   useEffect(() => {
     if (!productId) return;
-    
+
     const loadProduct = async () => {
       try {
         setIsLoading(true);
@@ -404,7 +417,7 @@ export const ProductDetail = () => {
 
   const handleAddToCart = () => {
     if (product) {
-      addBikeToCart({ ...product, id: uuid() });
+      addBikeToCart(product);
     }
   };
 
@@ -414,168 +427,224 @@ export const ProductDetail = () => {
 
   if (isLoading) {
     return (
-      <StyledDetailContainer>
-        <StyledDetailHeader>
-          <StyledBackButton onClick={() => navigate("/")}>
-            ← Back to Products
-          </StyledBackButton>
-        </StyledDetailHeader>
-        <div>Loading product...</div>
-      </StyledDetailContainer>
+        <StyledDetailContainer>
+          <StyledDetailHeader>
+            <StyledBackButton onClick={() => navigate("/")}>
+              ← Back to Products
+            </StyledBackButton>
+          </StyledDetailHeader>
+          <div>Loading product...</div>
+        </StyledDetailContainer>
     );
   }
 
   if (!product) {
     return (
+        <StyledDetailContainer>
+          <StyledDetailHeader>
+            <StyledBackButton onClick={() => navigate("/")}>
+              ← Back to Products
+            </StyledBackButton>
+          </StyledDetailHeader>
+          <div>Product not found: {error}</div>
+        </StyledDetailContainer>
+    );
+  }
+
+  const lowestPrice = getLowestPrice(product.sellers, product.price);
+  const lowestPriceDiscount = getLowestPriceDiscount(product.sellers);
+
+  const imageSrc = getImageUrl(product.imgSrc);
+
+  return (
       <StyledDetailContainer>
         <StyledDetailHeader>
           <StyledBackButton onClick={() => navigate("/")}>
             ← Back to Products
           </StyledBackButton>
         </StyledDetailHeader>
-        <div>Product not found: {error}</div>
-      </StyledDetailContainer>
-    );
-  }
 
-  const lowestPrice =
-    product.sellers && product.sellers.length > 0
-      ? Math.min(...product.sellers.map((s) => s.price))
-      : product.price;
+        <StyledDetailGrid>
+          <StyledImageSection>
+            <StyledImage
+                src={imageError ? getPlaceholderImage() : imageSrc}
+                alt={product.name}
+                onError={handleImageError}
+            />
+          </StyledImageSection>
 
-  const imageSrc = getImageUrl(product.imgSrc);
-  
-  return (
-    <StyledDetailContainer>
-      <StyledDetailHeader>
-        <StyledBackButton onClick={() => navigate("/")}>
-          ← Back to Products
-        </StyledBackButton>
-      </StyledDetailHeader>
+          <StyledInfoSection>
+            <StyledTitle>{product.name}</StyledTitle>
+            <StyledInfoTop>
+              <StyledPricingCard>
+                <StyledPriceRange>
+                  Lowest Price:{" "}
+                  <DiscountedPriceDisplay
+                      price={lowestPrice}
+                      discountRate={lowestPriceDiscount}
+                      size="lg"
+                      color="#e74c3c"
+                      layout="horizontal" // Changed to horizontal layout
+                      align="start"
+                      as="span"
+                  />
+                </StyledPriceRange>
 
-      <StyledDetailGrid>
-        <StyledImageSection>
-          <StyledImage 
-            src={imageError ? getPlaceholderImage() : imageSrc} 
-            alt={product.name}
-            onError={handleImageError}
-          />
-        </StyledImageSection>
+                <StyledAddToCartButton onClick={handleAddToCart}>
+                  Add to Compare
+                </StyledAddToCartButton>
 
-        <StyledInfoSection>
-          <StyledTitle>{product.name}</StyledTitle>
-          <StyledInfoTop>
-            <StyledPricingCard>
-              <StyledPriceRange>
-                Lowest Price: <strong>${lowestPrice}</strong>
-              </StyledPriceRange>
-              
-              <StyledAddToCartButton onClick={handleAddToCart}>
-                Add to Compare
-              </StyledAddToCartButton>
+                {product.sellers && product.sellers.length > 0 && (
+                    <>
+                      <StyledStoreCountContainer>
+                        <StyledStoreCountBadge>
+                          {product.sellers.length} Store{product.sellers.length > 1 ? "s" : ""} Available
+                        </StyledStoreCountBadge>
+                        {product.lastUpdated && (
+                            <StyledLastUpdatedText>
+                              Last updated: {new Date(product.lastUpdated).toLocaleString()}
+                            </StyledLastUpdatedText>
+                        )}
+                      </StyledStoreCountContainer>
 
-              {product.sellers && product.sellers.length > 0 && (
-                <>
-                  <StyledStoreCountContainer>
-                    <StyledStoreCountBadge>
-                      {product.sellers.length} Store{product.sellers.length > 1 ? "s" : ""} Available
-                    </StyledStoreCountBadge>
-                    {product.lastUpdated && (
-                      <StyledLastUpdatedText>
-                        Last updated: {new Date(product.lastUpdated).toLocaleString()}
-                      </StyledLastUpdatedText>
-                    )}
-                  </StyledStoreCountContainer>
-                  
-                  <StyledActualSellersSection>
-                    <StyledActualSellersTitle>
-                      Available at:
-                    </StyledActualSellersTitle>
-                    <StyledActualSellersList>
-                      {product.sellers.map((seller, idx) => (
-                        <StyledActualSellerItem 
-                          key={idx}
-                          onClick={() => {
-                            console.log(`🔗 Clicked seller: ${seller.name} | URL: ${seller.url}`);
-                            if (seller.url) {
-                              window.open(seller.url, "_blank");
-                            }
+                      <StyledActualSellersSection>
+                        <StyledActualSellersTitle>
+                          Available at:
+                        </StyledActualSellersTitle>
+                        <StyledActualSellersList>
+                          {product.sellers.map((seller, idx) => {
+                            console.log(`Seller ${idx}:`, seller);
+                            const currentDiscount = seller.discountRate ?? seller.discount_rate ?? 0;
+                            return (
+                                <StyledActualSellerItem
+                                    key={idx}
+                                    onClick={() => {
+                                      console.log(`🔗 Clicked seller: ${seller.name} | URL: ${seller.url}`);
+                                      if (seller.url) {
+                                        window.open(seller.url, "_blank");
+                                      }
+                                    }}
+                                >
+                                  <div style={{ flex: 1 }}>
+                                    <StyledActualSellerName>{seller.name}</StyledActualSellerName>
+                                    {currentDiscount > 0 && (
+                                        <div style={{
+                                          fontSize: "0.75rem",
+                                          color: "#e74c3c",
+                                          fontWeight: "600",
+                                          marginTop: "0.25rem"
+                                        }}>
+                                          Discount: -{currentDiscount}%
+                                        </div>
+                                    )}
+                                    {(seller.promotions || []).length > 0 && (
+                                        <div style={{
+                                          marginTop: "0.4rem",
+                                          paddingTop: "0.4rem",
+                                          borderTop: "1px solid #e0e0e0"
+                                        }}>
+                                          {(seller.promotions || []).map((promo: any, promoIdx: number) => (
+                                              <div
+                                                  key={promoIdx}
+                                                  style={{
+                                                    fontSize: "0.7rem",
+                                                    color: "#27ae60",
+                                                    fontWeight: "500",
+                                                    marginTop: promoIdx > 0 ? "0.25rem" : 0,
+                                                    display: "flex",
+                                                    alignItems: "flex-start",
+                                                    gap: "0.25rem"
+                                                  }}
+                                              >
+                                                <span>🎁</span>
+                                                <span>{promo.title || JSON.stringify(promo)}</span>
+                                              </div>
+                                          ))}
+                                        </div>
+                                    )}
+                                  </div>
+                                  <StyledActualSellerPrice>
+                                    <DiscountedPriceDisplay
+                                        price={seller.price}
+                                        discountRate={getSellerDiscount(seller)}
+                                        size="sm"
+                                        color="#e74c3c"
+                                        layout="horizontal" // Changed to horizontal layout for seller section
+                                    />
+                                  </StyledActualSellerPrice>
+                                </StyledActualSellerItem>
+                            );
+                          })}
+                        </StyledActualSellersList>
+                      </StyledActualSellersSection>
+                    </>
+                )}
+              </StyledPricingCard>
+            </StyledInfoTop>
+          </StyledInfoSection>
+        </StyledDetailGrid>
+
+        {/* Moved Specifications section here to act as a horizontal bridge */}
+        <StyledSpecTableWrapper>
+          <StyledSpecTitle>Specifications</StyledSpecTitle>
+          {product.specifications && Object.keys(product.specifications).length > 0 ? (
+              <StyledSpecGrid>
+                {Object.entries(product.specifications).map(([key, value], idx) => (
+                    <StyledSpecItem key={idx}>
+                      <StyledSpecRowLabel>
+                        {key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, " ")}
+                      </StyledSpecRowLabel>
+                      <StyledSpecRowValue>
+                        {typeof value === "object" ? JSON.stringify(value) : String(value)}
+                      </StyledSpecRowValue>
+                    </StyledSpecItem>
+                ))}
+              </StyledSpecGrid>
+          ) : (
+              <p>No specifications available for this product.</p>
+          )}
+        </StyledSpecTableWrapper>
+
+        <StyledDescriptionSection>
+          <StyledSpecTitle>Product Description</StyledSpecTitle>
+          {product.description ? (
+              (() => {
+                const htmlContent = extractHtmlContent(product.description);
+                if (htmlContent) {
+                  return (
+                      <div
+                          dangerouslySetInnerHTML={{
+                            __html: htmlContent,
                           }}
-                        >
-                          <StyledActualSellerName>{seller.name}</StyledActualSellerName>
-                          <StyledActualSellerPrice>${seller.price}</StyledActualSellerPrice>
-                        </StyledActualSellerItem>
-                      ))}
-                    </StyledActualSellersList>
-                  </StyledActualSellersSection>
-                </>
-              )}
-            </StyledPricingCard>
-          </StyledInfoTop>
-        </StyledInfoSection>
-      </StyledDetailGrid>
+                      />
+                  );
+                } else {
+                  // Split plain text descriptions into paragraphs for better readability
+                  const paragraphs = product.description
+                      .split(/\n\n+|\.\s+(?=[A-Z])/)
+                      .filter(p => p.trim().length > 0)
+                      .map((para, idx) => (
+                          <p key={idx}>
+                            {para.trim().endsWith('.') ? para.trim() : para.trim() + '.'}
+                          </p>
+                      ));
+                  return <>{paragraphs}</>;
+                }
+              })()
+          ) : (
+              <p>No product description available for this listing.</p>
+          )}
+        </StyledDescriptionSection>
 
-      {/* Moved Specifications section here to act as a horizontal bridge */}
-      <StyledSpecTableWrapper>
-        <StyledSpecTitle>Specifications</StyledSpecTitle>
-        {product.specifications && Object.keys(product.specifications).length > 0 ? (
-          <StyledSpecGrid>
-            {Object.entries(product.specifications).map(([key, value], idx) => (
-              <StyledSpecItem key={idx}>
-                <StyledSpecRowLabel>
-                  {key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, " ")}
-                </StyledSpecRowLabel>
-                <StyledSpecRowValue>
-                  {typeof value === "object" ? JSON.stringify(value) : String(value)}
-                </StyledSpecRowValue>
-              </StyledSpecItem>
-            ))}
-          </StyledSpecGrid>
-        ) : (
-          <p>No specifications available for this product.</p>
+        {product.priceHistory && product.priceHistory.length > 0 && (
+            <StyledPriceHistorySection>
+              <h2>Price History</h2>
+              <PriceHistoryChart
+                  priceHistory={product.priceHistory}
+                  currentPrice={product.price}
+              />
+            </StyledPriceHistorySection>
         )}
-      </StyledSpecTableWrapper>
-
-      <StyledDescriptionSection>
-        <StyledSpecTitle>Product Description</StyledSpecTitle>
-        {product.description ? (
-          (() => {
-            const htmlContent = extractHtmlContent(product.description);
-            if (htmlContent) {
-              return (
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: htmlContent,
-                  }}
-                />
-              );
-            } else {
-              // Split plain text descriptions into paragraphs for better readability
-              const paragraphs = product.description
-                .split(/\n\n+|\.\s+(?=[A-Z])/)
-                .filter(p => p.trim().length > 0)
-                .map((para, idx) => (
-                  <p key={idx}>
-                    {para.trim().endsWith('.') ? para.trim() : para.trim() + '.'}
-                  </p>
-                ));
-              return <>{paragraphs}</>;
-            }
-          })()
-        ) : (
-          <p>No product description available for this listing.</p>
-        )}
-      </StyledDescriptionSection>
-      
-      {product.priceHistory && product.priceHistory.length > 0 && (
-        <StyledPriceHistorySection>
-          <h2>Price History</h2>
-          <PriceHistoryChart 
-            priceHistory={product.priceHistory}
-            currentPrice={product.price}
-          />
-        </StyledPriceHistorySection>
-      )}
-    </StyledDetailContainer>
+      </StyledDetailContainer>
   );
 };

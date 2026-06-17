@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import productsRoutes from "./routes/products";
 import listingsRoutes from "./routes/listings";
 import pool from "./config/database";
+import { runMigrations } from "./config/migrations";
 
 dotenv.config();
 
@@ -24,10 +25,23 @@ app.get("/", (req, res) => {
   res.json({ success: true });
 });
 
+// Run migrations on startup
+let migrationsCompleted = false;
+const runMigrationsOnce = async () => {
+  if (!migrationsCompleted) {
+    try {
+      await runMigrations();
+      migrationsCompleted = true;
+    } catch (error) {
+      console.error("Failed to run migrations:", error);
+    }
+  }
+};
 
 // Test database connection
 app.get("/health", async (req, res) => {
     try {
+        await runMigrationsOnce();
         const result = await pool.query("SELECT NOW()");
         res.json({
             status: "OK",

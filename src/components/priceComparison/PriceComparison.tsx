@@ -3,6 +3,8 @@ import styled from "styled-components";
 import { Bike } from "../../common/types";
 import { memo } from "react";
 import { PriceHistoryChart } from "../priceHistory/PriceHistoryChart";
+import { DiscountedPriceDisplay } from "../common/DiscountedPriceDisplay";
+import { getLowestPrice, getLowestPriceDiscount, getSellerDiscount } from "../../utils/sellerPricing";
 
 const ComparisonContainer = styled.div`
   padding: 2rem;
@@ -85,9 +87,10 @@ const PriceLabel = styled.span`
 `;
 
 const Price = styled.div`
-  font-size: 2rem;
-  font-weight: bold;
-  color: #e74c3c;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
 `;
 
 const SellersSection = styled.div`
@@ -108,7 +111,7 @@ const SellersGrid = styled.div`
 
 const SellerLink = styled.a`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.65rem 0.75rem;
@@ -126,8 +129,42 @@ const SellerLink = styled.a`
 
 const SellerLeft = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.6rem;
+  flex: 1;
+  min-width: 0;
+`;
+
+const SellerInfo = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
+const SellerDiscount = styled.div`
+  font-size: 0.75rem;
+  color: #e74c3c;
+  font-weight: 600;
+  margin-top: 0.25rem;
+`;
+
+const SellerPromotions = styled.div`
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid #e0e0e0;
+`;
+
+const SellerPromotion = styled.div`
+  font-size: 0.7rem;
+  color: #27ae60;
+  font-weight: 500;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.25rem;
+
+  &:first-child {
+    margin-top: 0;
+  }
 `;
 
 const SellerLogo = styled.div`
@@ -150,9 +187,7 @@ const SellerName = styled.span`
 `;
 
 const SellerPrice = styled.span`
-  color: #e74c3c;
-  font-size: 0.95rem;
-  font-weight: 700;
+  display: inline-flex;
 `;
 
 const SpecsComparisonSection = styled.section`
@@ -305,7 +340,7 @@ const extractSpecsFromBike = (bike: Bike): Array<{ label: string; value: string 
 const groupSpecsByCategory = (
     specs: Array<{ label: string; value: string }>
 ): Array<{ category: string; specs: Array<{ label: string; value: string }> }> => {
-    const categoryKeywords: Record<string, string> = {
+    const categoryKeywords: Record<string, string[]> = {
         Battery: ["battery", "capacity", "ah", "voltage", "v"],
         Motor: ["motor", "power", "watt", "w", "hub"],
         Performance: ["speed", "max", "range", "km", "h"],
@@ -345,20 +380,9 @@ const groupSpecsByCategory = (
 };
 
 /**
- * Get seller details from bike sellers, generate logo from name
+ * Get seller logo initials from seller name
  */
-const getSellerDetailsFromBike = (bike: Bike) => {
-    if (!bike.sellers || bike.sellers.length === 0) {
-        return [];
-    }
-
-    return bike.sellers.map((seller) => ({
-        name: seller.name,
-        logo: seller.name.substring(0, 2).toUpperCase(),
-        price: seller.price,
-        url: seller.url,
-    }));
-};
+const getSellerLogo = (name: string) => name.substring(0, 2).toUpperCase();
 
 interface IPriceComparisonProps {
     shoppingCart: Array<Bike>;
@@ -366,9 +390,9 @@ interface IPriceComparisonProps {
 }
 
 const ProductComparisonItem = memo(({ bike }: { bike: Bike }) => {
-    const sellers = getSellerDetailsFromBike(bike);
-    const lowestPrice =
-        sellers && sellers.length > 0 ? Math.min(...sellers.map((s) => s.price)) : bike.price;
+    const sellers = bike.sellers || [];
+    const lowestPrice = getLowestPrice(bike.sellers, bike.price);
+    const lowestPriceDiscount = getLowestPriceDiscount(bike.sellers);
 
     return (
         <ProductCard>
@@ -377,26 +401,62 @@ const ProductComparisonItem = memo(({ bike }: { bike: Bike }) => {
 
             <PriceSection>
                 <PriceLabel>Lowest Price Available:</PriceLabel>
-                <Price>${lowestPrice}</Price>
+                <Price>
+                  <DiscountedPriceDisplay
+                    price={lowestPrice}
+                    discountRate={lowestPriceDiscount}
+                    size="xl"
+                    color="#e74c3c"
+                    layout="vertical"
+                    align="start"
+                    as="span"
+                  />
+                </Price>
             </PriceSection>
 
             <SellersSection>
                 <SellersTitle>Available at {sellers.length} Seller{sellers.length !== 1 ? "s" : ""}</SellersTitle>
                 <SellersGrid>
-                    {sellers.map((seller) => (
-                        <SellerLink
-                            key={seller.name}
-                            href={seller.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <SellerLeft>
-                                <SellerLogo>{seller.logo}</SellerLogo>
-                                <SellerName>{seller.name}</SellerName>
-                            </SellerLeft>
-                            <SellerPrice>${seller.price}</SellerPrice>
-                        </SellerLink>
-                    ))}
+                    {sellers.map((seller, idx) => {
+                        const discount = getSellerDiscount(seller);
+                        return (
+                            <SellerLink
+                                key={`${seller.name}-${idx}`}
+                                href={seller.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <SellerLeft>
+                                    <SellerLogo>{getSellerLogo(seller.name)}</SellerLogo>
+                                    <SellerInfo>
+                                        <SellerName>{seller.name}</SellerName>
+                                        {discount > 0 && (
+                                            <SellerDiscount>Discount: -{discount}%</SellerDiscount>
+                                        )}
+                                        {(seller.promotions || []).length > 0 && (
+                                            <SellerPromotions>
+                                                {(seller.promotions || []).map((promo, promoIdx) => (
+                                                    <SellerPromotion key={promoIdx}>
+                                                        <span>🎁</span>
+                                                        <span>{promo.title || JSON.stringify(promo)}</span>
+                                                    </SellerPromotion>
+                                                ))}
+                                            </SellerPromotions>
+                                        )}
+                                    </SellerInfo>
+                                </SellerLeft>
+                                <SellerPrice>
+                                  <DiscountedPriceDisplay
+                                    price={seller.price}
+                                    discountRate={discount}
+                                    size="sm"
+                                    color="#e74c3c"
+                                    layout="vertical"
+                                  />
+                                </SellerPrice>
+                            </SellerLink>
+                        );
+                    })}
                 </SellersGrid>
             </SellersSection>
         </ProductCard>

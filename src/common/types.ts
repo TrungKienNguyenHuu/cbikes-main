@@ -1,7 +1,16 @@
+export interface Promotion {
+  title: string;
+  description?: string;
+  discountPercentage?: number;
+}
+
 export interface Seller {
   name: string;
   price: number;
   url: string;
+  discountRate?: number;
+  discount_rate?: number;  // Support both camelCase and snake_case
+  promotions?: Promotion[];
 }
 
 export interface BikeSpecifications {
@@ -38,6 +47,10 @@ export const CategoryAll = "all";
 
 export interface FilterState {
   currentCategory: string;
+  minPrice: number;
   maxPrice: number;
+  pricePreset: string;
   currentSeller: string;
+  currentNeed?: string;    // phân loại theo nhu cầu
+  currentTier?: string;    // phân loại theo phân khúc
 }

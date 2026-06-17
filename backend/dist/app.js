@@ -9,6 +9,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const products_1 = __importDefault(require("./routes/products"));
 const listings_1 = __importDefault(require("./routes/listings"));
 const database_1 = __importDefault(require("./config/database"));
+const migrations_1 = require("./config/migrations");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5001;
@@ -23,9 +24,23 @@ app.use((req, res, next) => {
 app.get("/", (req, res) => {
     res.json({ success: true });
 });
+// Run migrations on startup
+let migrationsCompleted = false;
+const runMigrationsOnce = async () => {
+    if (!migrationsCompleted) {
+        try {
+            await (0, migrations_1.runMigrations)();
+            migrationsCompleted = true;
+        }
+        catch (error) {
+            console.error("Failed to run migrations:", error);
+        }
+    }
+};
 // Test database connection
 app.get("/health", async (req, res) => {
     try {
+        await runMigrationsOnce();
         const result = await database_1.default.query("SELECT NOW()");
         res.json({
             status: "OK",

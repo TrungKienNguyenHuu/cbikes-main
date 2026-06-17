@@ -3,11 +3,11 @@ import { COLORS, SHADOWS, SPACING, BREAKPOINTS } from "../../common/constants";
 
 export const StyledBikesGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: ${SPACING.lg};
-  margin-top: ${SPACING.lg};
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: ${SPACING.md};
+  margin-top: ${SPACING.md};
   flex: 1;
-    align-items: start;  
+  align-items: stretch; /* FORCES all cards in a row to have equal height */
     
   @media (max-width: ${BREAKPOINTS.tablet}) {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -24,6 +24,7 @@ export const StyledBikeCard = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
+  height: 100%; /* ENSURES the card fills the stretched grid cell */
   background-color: ${COLORS.background};
   border: 2px solid ${COLORS.borderLight};
   border-radius: 12px;
@@ -190,5 +191,47 @@ export const StyledSellerCountBadge = styled.div`
   @media (max-width: ${BREAKPOINTS.tablet}) {
     font-size: 0.7rem;
     padding: 0.2rem 0.5rem;
+  }
+`;
+
+export const StyledDiscountBadge = styled.div`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: ${COLORS.error};
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  z-index: 3;
+  box-shadow: ${SHADOWS.md};
+`;
+
+export const StyledPriceContainer = styled.div`
+  display: flex;
+  flex-direction: row; /* Keep elements side-by-side */
+  justify-content: space-between; /* Pushes the red badge to the right edge */
+  align-items: flex-start;
+  gap: ${SPACING.xs};
+  margin-top: auto;
+  width: 100%;
+  min-height: 52px; /* RESERVES SPACE for the 2-line discounted price */
+`;
+
+export const StyledOriginalPrice = styled.span`
+  font-size: 0.9rem !important;
+  color: #000000 !important;
+  text-decoration: line-through;
+  margin-top: 2px;
+  margin-bottom: 0 !important;
+  font-weight: 400 !important;
+`;
+
+export const StyledLowestPrice = styled.span`
+  @media (max-width: ${BREAKPOINTS.tablet}) {
+    .price-discount__price {
+      font-size: 1rem !important;
+    }
   }
 `;
