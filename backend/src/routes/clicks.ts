@@ -82,7 +82,7 @@ router.get("/", async (req: Request, res: Response) => {
         p.image_url,
         p.description,
         p.specifications,
-        COUNT(pc.click_id) as click_count,
+        COUNT(DISTINCT pc.click_id) as click_count, -- FIXED LINE
         MAX(pc.clicked_at) as last_clicked_at,
         b.name as brand_name,
         COALESCE(json_agg(
@@ -143,7 +143,7 @@ router.get("/trending", async (req: Request, res: Response) => {
         p.image_url,
         p.description,
         p.specifications,
-        COUNT(pc.click_id) as click_count,
+        COUNT(DISTINCT pc.click_id) as click_count, -- FIXED LINE
         MAX(pc.clicked_at) as last_clicked_at,
         b.name as brand_name,
         COALESCE(json_agg(
