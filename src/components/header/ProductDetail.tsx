@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { useEffect, useState } from "react";
+// NEW: Added useRef to the React imports
+import { useEffect, useState, useRef } from "react";
 import { Bike } from "../../common/types";
 import { fetchBikeByIdFromAPI } from "../../services/bikeService";
 import { recordProductClick } from "../../services/hotProductsService";
@@ -8,6 +9,8 @@ import { getImageUrl, getPlaceholderImage } from "../../utils/imageLoader";
 import { DiscountedPriceDisplay } from "../common/DiscountedPriceDisplay";
 import { PriceHistoryChart } from "../priceHistory/PriceHistoryChart";
 import { getLowestPrice, getLowestPriceDiscount, getSellerDiscount, getLowestPriceOriginal } from "../../utils/sellerPricing";
+// NEW: Import the session ID generator
+import { getOrCreateSessionId } from "../../utils/session";
 
 /**
  * Unescape unicode escape sequences in JSON strings
@@ -54,6 +57,7 @@ const extractHtmlContent = (html: string): string | null => {
   return null;
 };
 
+// --- STYLED COMPONENTS REMAIN EXACTLY THE SAME ---
 const StyledDetailContainer = styled.div`
   padding: 2rem;
   max-width: 1200px;
@@ -125,17 +129,15 @@ const StyledPriceRange = styled.div`
   font-size: 1.5rem;
   color: #666;
   display: flex;
-  align-items: center; /* Aligns text nicely vertically */
+  align-items: center; 
   flex-wrap: wrap;
   gap: 0.5rem;
 
-  /* Aggressively force identical text size for both discounted and original prices */
   & * {
     font-size: 1.5rem !important;
   }
 `;
 
-// Updated: Removed the grid columns since the spec section was moved out
 const StyledInfoTop = styled.div`
   display: flex;
   flex-direction: column;
@@ -149,7 +151,6 @@ const StyledPricingCard = styled.div`
   padding: 1rem;
 `;
 
-// Updated: Added margin-top to separate from the top grid layout
 const StyledSpecTableWrapper = styled.div`
   background-color: #f9f9f9;
   border: 1px solid #e0e0e0;
@@ -164,7 +165,6 @@ const StyledSpecTitle = styled.h2`
   color: #333;
 `;
 
-// Updated: Changed from a table to a horizontal grid to better utilize full width
 const StyledSpecGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -200,7 +200,6 @@ const StyledDescriptionSection = styled.section`
   line-height: 1.9;
   color: #333;
 
-  /* HTML content styles */
   img {
     max-width: 100%;
     height: auto;
@@ -374,7 +373,6 @@ const StyledActualSellerPrice = styled.span`
   display: inline-flex;
   align-items: center;
 
-  /* Force identical text size for seller pricing */
   & * {
     font-size: 1rem !important;
   }
@@ -383,6 +381,8 @@ const StyledActualSellerPrice = styled.span`
 interface ProductDetailProps {
   addBikeToCart: (bike: Bike) => void;
 }
+
+// --- COMPONENT LOGIC ---
 
 export const ProductDetail = ({ addBikeToCart }: ProductDetailProps) => {
   const { productId } = useParams();
@@ -393,9 +393,14 @@ export const ProductDetail = ({ addBikeToCart }: ProductDetailProps) => {
   const [error, setError] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
 
+  // NEW: The Gatekeeper reference to prevent multiple API calls per visit
+  const hasRecordedClick = useRef(false);
 
   useEffect(() => {
     if (!productId) return;
+
+    // Reset the gatekeeper if the productId actually changes (user navigates to a different product)
+    hasRecordedClick.current = false;
 
     const loadProduct = async () => {
       try {
@@ -404,12 +409,19 @@ export const ProductDetail = ({ addBikeToCart }: ProductDetailProps) => {
         setImageError(false);
         const bike = await fetchBikeByIdFromAPI(productId);
         setProduct(bike);
-        
-        // Record this product click for hot products tracking
-        recordProductClick(productId).catch((err) => {
-          console.warn("Failed to record product click:", err);
-          // Non-critical, don't fail the page load
-        });
+
+        // NEW: Only record the click if we haven't done it yet for this specific product visit
+        if (!hasRecordedClick.current) {
+          hasRecordedClick.current = true; // Lock the gate
+
+          // Generate or fetch the anonymous session ID
+          const sessionId = getOrCreateSessionId();
+
+          // Send both the product ID and the session ID
+          recordProductClick(productId, sessionId).catch((err) => {
+            console.warn("Failed to record product click:", err);
+          });
+        }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Failed to load product";
         setError(errorMessage);
@@ -462,7 +474,6 @@ export const ProductDetail = ({ addBikeToCart }: ProductDetailProps) => {
   const lowestPriceDiscount = getLowestPriceDiscount(product.sellers);
   const lowestPriceOriginal = getLowestPriceOriginal(product.sellers, product.price);
 
-  // Use detailImageUrl if available (from listings), otherwise fall back to imgSrc
   const imageSrc = getImageUrl(product.detailImageUrl || product.imgSrc);
 
   return (
@@ -494,7 +505,7 @@ export const ProductDetail = ({ addBikeToCart }: ProductDetailProps) => {
                       originalPrice={lowestPriceOriginal ?? undefined}
                       size="lg"
                       color="#e74c3c"
-                      layout="horizontal" // Changed to horizontal layout
+                      layout="horizontal"
                       align="start"
                       as="span"
                   />
@@ -523,13 +534,11 @@ export const ProductDetail = ({ addBikeToCart }: ProductDetailProps) => {
                         </StyledActualSellersTitle>
                         <StyledActualSellersList>
                           {product.sellers.map((seller, idx) => {
-                            console.log(`Seller ${idx}:`, seller);
                             const currentDiscount = seller.discountRate ?? seller.discount_rate ?? 0;
                             return (
                                 <StyledActualSellerItem
                                     key={idx}
                                     onClick={() => {
-                                      console.log(`🔗 Clicked seller: ${seller.name} | URL: ${seller.url}`);
                                       if (seller.url) {
                                         window.open(seller.url, "_blank");
                                       }
@@ -580,7 +589,7 @@ export const ProductDetail = ({ addBikeToCart }: ProductDetailProps) => {
                                         originalPrice={seller.original_price ?? undefined}
                                         size="sm"
                                         color="#e74c3c"
-                                        layout="horizontal" // Changed to horizontal layout for seller section
+                                        layout="horizontal"
                                     />
                                   </StyledActualSellerPrice>
                                 </StyledActualSellerItem>
@@ -595,7 +604,6 @@ export const ProductDetail = ({ addBikeToCart }: ProductDetailProps) => {
           </StyledInfoSection>
         </StyledDetailGrid>
 
-        {/* Moved Specifications section here to act as a horizontal bridge */}
         <StyledSpecTableWrapper>
           <StyledSpecTitle>Specifications</StyledSpecTitle>
           {product.specifications && Object.keys(product.specifications).length > 0 ? (
@@ -630,7 +638,6 @@ export const ProductDetail = ({ addBikeToCart }: ProductDetailProps) => {
                       />
                   );
                 } else {
-                  // Split plain text descriptions into paragraphs for better readability
                   const paragraphs = product.description
                       .split(/\n\n+|\.\s+(?=[A-Z])/)
                       .filter(p => p.trim().length > 0)

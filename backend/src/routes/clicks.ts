@@ -11,10 +11,10 @@ router.post("/:productId", async (req: Request, res: Response) => {
     const ipAddress = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown";
     const userAgent = req.headers["user-agent"] || "unknown";
 
-    // Validate product exists
+    // 1. Validate product exists
     const productCheck = await pool.query(
-      "SELECT product_id FROM products WHERE product_id = $1",
-      [productId]
+        "SELECT product_id FROM products WHERE product_id = $1",
+        [productId]
     );
 
     if (productCheck.rows.length === 0) {
@@ -22,7 +22,26 @@ router.post("/:productId", async (req: Request, res: Response) => {
       return;
     }
 
-    // Record the click
+    // 2. NEW: Check if this user already clicked this product in the last 24 hours
+    // (We skip this check if the ID is somehow still "anonymous" to prevent blocking everyone)
+    if (userSessionId !== "anonymous") {
+      const duplicateCheck = await pool.query(
+          `SELECT click_id FROM product_clicks 
+         WHERE product_id = $1 
+         AND user_session_id = $2 
+         AND clicked_at >= NOW() - INTERVAL '24 hours'`,
+          [productId, userSessionId]
+      );
+
+      // If they already clicked it, return success but don't save to database
+      if (duplicateCheck.rows.length > 0) {
+        console.log(`⏳ Ignored duplicate click from ${userSessionId} for product ${productId}`);
+        res.json({ success: true, message: "Click already recorded recently" });
+        return;
+      }
+    }
+
+    // 3. Record the click
     const query = `
       INSERT INTO product_clicks (product_id, user_session_id, ip_address, user_agent)
       VALUES ($1, $2, $3, $4)
@@ -32,7 +51,7 @@ router.post("/:productId", async (req: Request, res: Response) => {
     const result = await pool.query(query, [
       productId,
       userSessionId,
-      ipAddress,
+      ipAddress, // You can remove this if you decided you don't want IP tracking!
       userAgent,
     ]);
 
@@ -110,6 +129,7 @@ router.get("/", async (req: Request, res: Response) => {
 
 // GET: Get hot products by ID (alternative endpoint without /hot prefix)
 router.get("/trending", async (req: Request, res: Response) => {
+  // ... (Keep this identical to your original code, it was perfectly fine)
   try {
     const { days = 7, limit = 10 } = req.query;
     const daysNum = parseInt(days as string, 10) || 7;
