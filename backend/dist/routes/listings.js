@@ -16,8 +16,10 @@ router.get("/", async (req, res) => {
         pl.platform_id,
         pl.listing_title,
         pl.price,
+        pl.original_price,
         pl.url,
         pl.image_url,
+        pl.detail_image_url,
         pl.first_seen,
         pl.last_updated,
         pl.discount_rate,
@@ -37,8 +39,10 @@ router.get("/", async (req, res) => {
             platform_id: row.platform_id,
             listing_title: row.listing_title,
             price: row.price,
+            original_price: row.original_price,
             url: row.url,
             image_url: row.image_url,
+            detail_image_url: row.detail_image_url,
             first_seen: row.first_seen,
             last_updated: row.last_updated,
             discount_rate: row.discount_rate,
@@ -69,8 +73,10 @@ router.get("/product/:productId", async (req, res) => {
         pl.platform_id,
         pl.listing_title,
         pl.price,
+        pl.original_price,
         pl.url,
         pl.image_url,
+        pl.detail_image_url,
         pl.first_seen,
         pl.last_updated,
         pl.discount_rate,
@@ -91,8 +97,10 @@ router.get("/product/:productId", async (req, res) => {
             platform_id: row.platform_id,
             listing_title: row.listing_title,
             price: row.price,
+            original_price: row.original_price,
             url: row.url,
             image_url: row.image_url,
+            detail_image_url: row.detail_image_url,
             first_seen: row.first_seen,
             last_updated: row.last_updated,
             discount_rate: row.discount_rate,
@@ -123,8 +131,10 @@ router.get("/platform/:platformSlug", async (req, res) => {
         pl.platform_id,
         pl.listing_title,
         pl.price,
+        pl.original_price,
         pl.url,
         pl.image_url,
+        pl.detail_image_url,
         pl.first_seen,
         pl.last_updated
       FROM product_listings pl
@@ -152,8 +162,10 @@ router.get("/:listingId/price-history", async (req, res) => {
         pl.platform_id,
         pl.listing_title,
         pl.price,
+        pl.original_price,
         pl.url,
         pl.image_url,
+        pl.detail_image_url,
         pl.first_seen,
         pl.last_updated,
         json_agg(
@@ -166,7 +178,7 @@ router.get("/:listingId/price-history", async (req, res) => {
       FROM product_listings pl
       LEFT JOIN price_history ph ON pl.listing_id = ph.listing_id
       WHERE pl.listing_id = $1
-      GROUP BY pl.listing_id, pl.product_id, pl.platform_id, pl.listing_title, pl.price, pl.url, pl.image_url, pl.first_seen, pl.last_updated
+      GROUP BY pl.listing_id, pl.product_id, pl.platform_id, pl.listing_title, pl.price, pl.original_price, pl.url, pl.image_url, pl.detail_image_url, pl.first_seen, pl.last_updated
     `;
         const result = await database_1.default.query(query, [listingId]);
         if (result.rows.length === 0) {

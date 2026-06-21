@@ -7,6 +7,7 @@ export interface Promotion {
 export interface Seller {
   name: string;
   price: number;
+  original_price?: number;
   url: string;
   discountRate?: number;
   discount_rate?: number;  // Support both camelCase and snake_case
@@ -33,6 +34,7 @@ export interface Bike {
   category: string;
   price: number;
   imgSrc: string;
+  detailImageUrl?: string;
   link: string;
   reviewText?: string;
   specifications?: Record<string, any>;

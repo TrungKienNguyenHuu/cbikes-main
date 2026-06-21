@@ -8,6 +8,7 @@ const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const products_1 = __importDefault(require("./routes/products"));
 const listings_1 = __importDefault(require("./routes/listings"));
+const clicks_1 = __importDefault(require("./routes/clicks"));
 const database_1 = __importDefault(require("./config/database"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -45,6 +46,7 @@ app.get("/health", async (req, res) => {
 // Routes
 app.use("/products", products_1.default);
 app.use("/listings", listings_1.default);
+app.use("/clicks", clicks_1.default);
 app.get("*", (req, res) => {
     res.json({
         message: "Catch-all route reached",

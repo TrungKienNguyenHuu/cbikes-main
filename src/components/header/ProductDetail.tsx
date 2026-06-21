@@ -3,10 +3,11 @@ import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { Bike } from "../../common/types";
 import { fetchBikeByIdFromAPI } from "../../services/bikeService";
+import { recordProductClick } from "../../services/hotProductsService";
 import { getImageUrl, getPlaceholderImage } from "../../utils/imageLoader";
 import { DiscountedPriceDisplay } from "../common/DiscountedPriceDisplay";
 import { PriceHistoryChart } from "../priceHistory/PriceHistoryChart";
-import { getLowestPrice, getLowestPriceDiscount, getSellerDiscount } from "../../utils/sellerPricing";
+import { getLowestPrice, getLowestPriceDiscount, getSellerDiscount, getLowestPriceOriginal } from "../../utils/sellerPricing";
 
 /**
  * Unescape unicode escape sequences in JSON strings
@@ -403,6 +404,12 @@ export const ProductDetail = ({ addBikeToCart }: ProductDetailProps) => {
         setImageError(false);
         const bike = await fetchBikeByIdFromAPI(productId);
         setProduct(bike);
+        
+        // Record this product click for hot products tracking
+        recordProductClick(productId).catch((err) => {
+          console.warn("Failed to record product click:", err);
+          // Non-critical, don't fail the page load
+        });
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Failed to load product";
         setError(errorMessage);
@@ -453,8 +460,10 @@ export const ProductDetail = ({ addBikeToCart }: ProductDetailProps) => {
 
   const lowestPrice = getLowestPrice(product.sellers, product.price);
   const lowestPriceDiscount = getLowestPriceDiscount(product.sellers);
+  const lowestPriceOriginal = getLowestPriceOriginal(product.sellers, product.price);
 
-  const imageSrc = getImageUrl(product.imgSrc);
+  // Use detailImageUrl if available (from listings), otherwise fall back to imgSrc
+  const imageSrc = getImageUrl(product.detailImageUrl || product.imgSrc);
 
   return (
       <StyledDetailContainer>
@@ -482,6 +491,7 @@ export const ProductDetail = ({ addBikeToCart }: ProductDetailProps) => {
                   <DiscountedPriceDisplay
                       price={lowestPrice}
                       discountRate={lowestPriceDiscount}
+                      originalPrice={lowestPriceOriginal ?? undefined}
                       size="lg"
                       color="#e74c3c"
                       layout="horizontal" // Changed to horizontal layout
@@ -567,6 +577,7 @@ export const ProductDetail = ({ addBikeToCart }: ProductDetailProps) => {
                                     <DiscountedPriceDisplay
                                         price={seller.price}
                                         discountRate={getSellerDiscount(seller)}
+                                        originalPrice={seller.original_price ?? undefined}
                                         size="sm"
                                         color="#e74c3c"
                                         layout="horizontal" // Changed to horizontal layout for seller section

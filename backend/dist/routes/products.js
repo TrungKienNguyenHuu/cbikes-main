@@ -17,6 +17,7 @@ const extractSellersFromListings = (listings) => {
                 sellerMap.set(platformId, {
                     name: platformName,
                     price: listing.price,
+                    ...(listing.original_price !== undefined && { original_price: listing.original_price }),
                     url: listing.url,
                     ...(listing.discount_rate !== undefined && { discount_rate: listing.discount_rate }),
                     ...(listing.promotions && listing.promotions.length > 0 && { promotions: listing.promotions }),
@@ -28,6 +29,9 @@ const extractSellersFromListings = (listings) => {
                 if (listing.price < existing.price) {
                     existing.price = listing.price;
                     existing.url = listing.url;
+                    if (listing.original_price !== undefined) {
+                        existing.original_price = listing.original_price;
+                    }
                     if (listing.discount_rate !== undefined) {
                         existing.discount_rate = listing.discount_rate;
                     }
@@ -65,8 +69,10 @@ router.get("/", async (req, res) => {
             'platform_id', pl.platform_id,
             'listing_title', pl.listing_title,
             'price', pl.price,
+            'original_price', pl.original_price,
             'url', pl.url,
             'image_url', pl.image_url,
+            'detail_image_url', pl.detail_image_url,
             'first_seen', pl.first_seen,
             'last_updated', pl.last_updated,
             'discount_rate', pl.discount_rate,
@@ -157,8 +163,10 @@ router.get("/:productId", async (req, res) => {
             'platform_id', pl.platform_id,
             'listing_title', pl.listing_title,
             'price', pl.price,
+            'original_price', pl.original_price,
             'url', pl.url,
             'image_url', pl.image_url,
+            'detail_image_url', pl.detail_image_url,
             'first_seen', pl.first_seen,
             'last_updated', pl.last_updated,
             'discount_rate', pl.discount_rate,
@@ -252,8 +260,10 @@ router.get("/brand/:brandSlug", async (req, res) => {
             'platform_id', pl.platform_id,
             'listing_title', pl.listing_title,
             'price', pl.price,
+            'original_price', pl.original_price,
             'url', pl.url,
             'image_url', pl.image_url,
+            'detail_image_url', pl.detail_image_url,
             'first_seen', pl.first_seen,
             'last_updated', pl.last_updated
           ) ORDER BY pl.price ASC

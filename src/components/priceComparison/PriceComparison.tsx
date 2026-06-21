@@ -4,7 +4,7 @@ import { Bike } from "../../common/types";
 import { memo } from "react";
 import { PriceHistoryChart } from "../priceHistory/PriceHistoryChart";
 import { DiscountedPriceDisplay } from "../common/DiscountedPriceDisplay";
-import { getLowestPrice, getLowestPriceDiscount, getSellerDiscount } from "../../utils/sellerPricing";
+import { getLowestPrice, getLowestPriceDiscount, getSellerDiscount, getLowestPriceOriginal } from "../../utils/sellerPricing";
 
 const ComparisonContainer = styled.div`
   padding: 2rem;
@@ -393,6 +393,7 @@ const ProductComparisonItem = memo(({ bike }: { bike: Bike }) => {
     const sellers = bike.sellers || [];
     const lowestPrice = getLowestPrice(bike.sellers, bike.price);
     const lowestPriceDiscount = getLowestPriceDiscount(bike.sellers);
+    const lowestPriceOriginal = getLowestPriceOriginal(bike.sellers, bike.price);
 
     return (
         <ProductCard>
@@ -405,6 +406,7 @@ const ProductComparisonItem = memo(({ bike }: { bike: Bike }) => {
                   <DiscountedPriceDisplay
                     price={lowestPrice}
                     discountRate={lowestPriceDiscount}
+                    originalPrice={lowestPriceOriginal ?? undefined}
                     size="xl"
                     color="#e74c3c"
                     layout="vertical"
@@ -449,6 +451,7 @@ const ProductComparisonItem = memo(({ bike }: { bike: Bike }) => {
                                   <DiscountedPriceDisplay
                                     price={seller.price}
                                     discountRate={discount}
+                                    originalPrice={seller.original_price ?? undefined}
                                     size="sm"
                                     color="#e74c3c"
                                     layout="vertical"

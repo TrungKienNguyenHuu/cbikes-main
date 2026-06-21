@@ -1,0 +1,161 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const database_1 = __importDefault(require("../config/database"));
+const router = (0, express_1.Router)();
+// POST: Record a click on a product
+router.post("/:productId", async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const userSessionId = req.body.userSessionId || req.headers["x-session-id"] || "anonymous";
+        const ipAddress = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown";
+        const userAgent = req.headers["user-agent"] || "unknown";
+        // Validate product exists
+        const productCheck = await database_1.default.query("SELECT product_id FROM products WHERE product_id = $1", [productId]);
+        if (productCheck.rows.length === 0) {
+            res.status(404).json({ error: "Product not found" });
+            return;
+        }
+        // Record the click
+        const query = `
+      INSERT INTO product_clicks (product_id, user_session_id, ip_address, user_agent)
+      VALUES ($1, $2, $3, $4)
+      RETURNING click_id, product_id, clicked_at
+    `;
+        const result = await database_1.default.query(query, [
+            productId,
+            userSessionId,
+            ipAddress,
+            userAgent,
+        ]);
+        res.json({
+            success: true,
+            click_id: result.rows[0].click_id,
+            product_id: result.rows[0].product_id,
+            clicked_at: result.rows[0].clicked_at,
+        });
+    }
+    catch (error) {
+        console.error("Error recording click:", error);
+        res.status(500).json({ error: "Failed to record click" });
+    }
+});
+// GET: Get hot products (most clicked in the last X days)
+router.get("/", async (req, res) => {
+    try {
+        const { days = 7, limit = 10 } = req.query;
+        const daysNum = parseInt(days, 10) || 7;
+        const limitNum = parseInt(limit, 10) || 10;
+        const query = `
+      SELECT 
+        p.product_id,
+        p.name,
+        p.slug,
+        p.image_url,
+        p.description,
+        p.specifications,
+        COUNT(pc.click_id) as click_count,
+        MAX(pc.clicked_at) as last_clicked_at,
+        b.name as brand_name,
+        COALESCE(json_agg(
+          json_build_object(
+            'listing_id', pl.listing_id,
+            'price', pl.price,
+            'original_price', pl.original_price,
+            'discount_rate', pl.discount_rate,
+            'url', pl.url,
+            'platform_name', plat.name
+          ) ORDER BY pl.price ASC
+        ) FILTER (WHERE pl.listing_id IS NOT NULL), '[]'::json) as listings
+      FROM product_clicks pc
+      JOIN products p ON pc.product_id = p.product_id
+      LEFT JOIN brands b ON p.brand_id = b.brand_id
+      LEFT JOIN product_listings pl ON p.product_id = pl.product_id
+      LEFT JOIN platforms plat ON pl.platform_id = plat.platform_id
+      WHERE pc.clicked_at >= NOW() - INTERVAL '${daysNum} days'
+      GROUP BY p.product_id, p.name, p.slug, p.image_url, p.description, p.specifications, b.name
+      ORDER BY click_count DESC
+      LIMIT $1
+    `;
+        const result = await database_1.default.query(query, [limitNum]);
+        const hotProducts = result.rows.map((row) => ({
+            product_id: row.product_id,
+            name: row.name,
+            slug: row.slug,
+            image_url: row.image_url,
+            description: row.description,
+            specifications: row.specifications,
+            brand_name: row.brand_name,
+            click_count: parseInt(row.click_count, 10),
+            last_clicked_at: row.last_clicked_at,
+            listings: row.listings,
+        }));
+        res.json(hotProducts);
+    }
+    catch (error) {
+        console.error("Error fetching hot products:", error);
+        res.status(500).json({ error: "Failed to fetch hot products" });
+    }
+});
+// GET: Get hot products by ID (alternative endpoint without /hot prefix)
+router.get("/trending", async (req, res) => {
+    try {
+        const { days = 7, limit = 10 } = req.query;
+        const daysNum = parseInt(days, 10) || 7;
+        const limitNum = parseInt(limit, 10) || 10;
+        const query = `
+      SELECT 
+        p.product_id,
+        p.name,
+        p.slug,
+        p.image_url,
+        p.description,
+        p.specifications,
+        COUNT(pc.click_id) as click_count,
+        MAX(pc.clicked_at) as last_clicked_at,
+        b.name as brand_name,
+        COALESCE(json_agg(
+          json_build_object(
+            'listing_id', pl.listing_id,
+            'price', pl.price,
+            'original_price', pl.original_price,
+            'discount_rate', pl.discount_rate,
+            'url', pl.url,
+            'platform_name', plat.name
+          ) ORDER BY pl.price ASC
+        ) FILTER (WHERE pl.listing_id IS NOT NULL), '[]'::json) as listings
+      FROM product_clicks pc
+      JOIN products p ON pc.product_id = p.product_id
+      LEFT JOIN brands b ON p.brand_id = b.brand_id
+      LEFT JOIN product_listings pl ON p.product_id = pl.product_id
+      LEFT JOIN platforms plat ON pl.platform_id = plat.platform_id
+      WHERE pc.clicked_at >= NOW() - INTERVAL '${daysNum} days'
+      GROUP BY p.product_id, p.name, p.slug, p.image_url, p.description, p.specifications, b.name
+      ORDER BY click_count DESC
+      LIMIT $1
+    `;
+        const result = await database_1.default.query(query, [limitNum]);
+        const hotProducts = result.rows.map((row) => ({
+            product_id: row.product_id,
+            name: row.name,
+            slug: row.slug,
+            image_url: row.image_url,
+            description: row.description,
+            specifications: row.specifications,
+            brand_name: row.brand_name,
+            click_count: parseInt(row.click_count, 10),
+            last_clicked_at: row.last_clicked_at,
+            listings: row.listings,
+        }));
+        res.json(hotProducts);
+    }
+    catch (error) {
+        console.error("Error fetching trending products:", error);
+        res.status(500).json({ error: "Failed to fetch trending products" });
+    }
+});
+exports.default = router;
+//# sourceMappingURL=clicks.js.map

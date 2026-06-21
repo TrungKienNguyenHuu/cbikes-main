@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import productsRoutes from "./routes/products";
 import listingsRoutes from "./routes/listings";
+import clicksRoutes from "./routes/clicks";
 import pool from "./config/database";
 
 dotenv.config();
@@ -46,6 +47,7 @@ app.get("/health", async (req, res) => {
 // Routes
 app.use("/products", productsRoutes);
 app.use("/listings", listingsRoutes);
+app.use("/clicks", clicksRoutes);
 
 app.get("*", (req, res) => {
   res.json({

@@ -39,8 +39,10 @@ export interface ProductListing {
   platform_id: string;
   listing_title: string;
   price: number;
+  original_price?: number;
   url: string;
   image_url?: string;
+  detail_image_url?: string;
   first_seen: Date;
   last_updated: Date;
   discount_rate?: number;

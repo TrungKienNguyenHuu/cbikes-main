@@ -7,7 +7,21 @@
     <list default="true" id="28e2b920-4343-40b7-8f21-0104008a97b4" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/app.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/app.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/bikesGrid/BikesGrid.style.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/bikesGrid/BikesGrid.style.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/config/database.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/config/database.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/routes/listings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/routes/listings.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/routes/products.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/routes/products.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/types/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/types/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/bikesGrid/BikesGrid.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/bikesGrid/BikesGrid.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/DiscountedPriceDisplay.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/DiscountedPriceDisplay.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/header/FavoritesDropdown.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/header/FavoritesDropdown.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/header/ProductDetail.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/header/ProductDetail.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/priceComparison/PriceComparison.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/priceComparison/PriceComparison.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/shoppingCart/ShoppingCart.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/shoppingCart/ShoppingCart.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/bikeService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/bikeService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/productService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/productService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/sellerPricing.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/sellerPricing.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -143,6 +157,7 @@
       <workItem from="1781735599516" duration="835000" />
       <workItem from="1781736628235" duration="291000" />
       <workItem from="1781737253532" duration="459000" />
+      <workItem from="1782002394302" duration="2396000" />
     </task>
     <servers />
   </component>

@@ -1,6 +1,6 @@
 import { Bike } from "../../common/types";
 import { getImageUrl, getPlaceholderImage } from "../../utils/imageLoader";
-import { getLowestPrice, getLowestPriceDiscount } from "../../utils/sellerPricing";
+import { getLowestPrice, getLowestPriceDiscount, getLowestPriceOriginal } from "../../utils/sellerPricing";
 import { DiscountedPriceDisplay } from "../common/DiscountedPriceDisplay";
 import { COLORS } from "../../common/constants";
 import {
@@ -54,6 +54,7 @@ const GridItem = memo(
 
         const lowestPrice = getLowestPrice(bike.sellers, bike.price);
         const lowestPriceDiscount = getLowestPriceDiscount(bike.sellers);
+        const lowestPriceOriginal = getLowestPriceOriginal(bike.sellers, bike.price);
 
         return (
             <StyledBikeCardWithHover>
@@ -97,6 +98,7 @@ const GridItem = memo(
                         <DiscountedPriceDisplay
                             price={lowestPrice}
                             discountRate={lowestPriceDiscount}
+                            originalPrice={lowestPriceOriginal ?? undefined}
                             size="lg"
                             color={COLORS.primary}
                             layout="vertical"

@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { IMG_PATH, COLORS, SPACING, SHADOWS } from "../../common/constants";
 import { Bike } from "../../common/types";
 import { DiscountedPriceDisplay } from "../common/DiscountedPriceDisplay";
-import { getLowestPrice, getLowestPriceDiscount } from "../../utils/sellerPricing";
+import { getLowestPrice, getLowestPriceDiscount, getLowestPriceOriginal } from "../../utils/sellerPricing";
 
 const Dropdown = styled.div`
   position: absolute;
@@ -138,6 +138,7 @@ export const FavoritesDropdown = memo(
                   <DiscountedPriceDisplay
                     price={getLowestPrice(bike.sellers, bike.price)}
                     discountRate={getLowestPriceDiscount(bike.sellers)}
+                    originalPrice={getLowestPriceOriginal(bike.sellers, bike.price) ?? undefined}
                     size="sm"
                     color={COLORS.primary}
                     layout="vertical"

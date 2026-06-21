@@ -42,8 +42,10 @@ interface ProductListing {
   platform_id: string;
   listing_title: string;
   price: number;
+  original_price?: number;
   url: string;
   image_url?: string;
+  detail_image_url?: string;
   first_seen: string;
   last_updated: string;
   discount_rate?: number;
@@ -79,6 +81,7 @@ const mergeSellers = (
       url: seller.url,
       ...(seller.discountRate !== undefined && { discountRate: seller.discountRate }),
       ...(seller.discount_rate !== undefined && !seller.discountRate && { discountRate: seller.discount_rate }),
+      ...(seller.original_price !== undefined && { original_price: seller.original_price }),
       ...(seller.promotions && seller.promotions.length > 0 && { promotions: seller.promotions }),
     };
     const key = name.toLowerCase();
@@ -99,6 +102,7 @@ const getSellersFromListings = (listings: ProductListing[]): Seller[] => {
     if (listing.discount_rate || listing.promotions) {
       console.log(`💰 Listing for ${platformName}:`, {
         price: listing.price,
+        original_price: listing.original_price,
         discount_rate: listing.discount_rate,
         promotions: listing.promotions
       });
@@ -108,6 +112,7 @@ const getSellersFromListings = (listings: ProductListing[]): Seller[] => {
       name: platformName,
       price: listing.price,
       url: listing.url,
+      ...(listing.original_price !== undefined && { original_price: listing.original_price }),
       ...(listing.discount_rate !== undefined && { discountRate: listing.discount_rate }),
       ...(listing.promotions && listing.promotions.length > 0 && { promotions: listing.promotions }),
     };
@@ -435,6 +440,7 @@ const transformProductToBike = (product: ProductFromAPI): Bike | null => {
       name: product.name,
       price: lowestPriceListing.price,
       imgSrc: product.image_url || lowestPriceListing.image_url || "", // Use product image or listing image
+      detailImageUrl: lowestPriceListing.detail_image_url, // Use detail_image_url for product detail page
       category: category,
       link: lowestPriceListing.url || "",
       reviewText: `Available at ${sellers.length} store${sellers.length > 1 ? "s" : ""}`,

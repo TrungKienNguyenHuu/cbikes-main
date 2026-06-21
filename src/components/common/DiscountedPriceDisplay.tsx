@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { COLORS } from "../../common/constants";
 import { PriceDisplay } from "./PriceDisplay";
 import { getOriginalPrice } from "../../utils/sellerPricing";
 
@@ -8,6 +7,7 @@ type PriceSize = "sm" | "md" | "lg" | "xl";
 interface DiscountedPriceDisplayProps {
     price: number;
     discountRate: number;
+    originalPrice?: number;
     size?: PriceSize;
     color?: string;
     originalColor?: string;
@@ -47,6 +47,7 @@ const VerticalWrap = styled.span<{ $align: "start" | "end" }>`
 export const DiscountedPriceDisplay = ({
                                            price,
                                            discountRate,
+                                           originalPrice: propOriginalPrice,
                                            size = "md",
                                            color,
                                            originalColor = "#000000",
@@ -55,9 +56,14 @@ export const DiscountedPriceDisplay = ({
                                            as = "span",
                                            className,
                                        }: DiscountedPriceDisplayProps) => {
-    const originalPrice = getOriginalPrice(price, discountRate);
+    // Use the passed-in originalPrice when available, otherwise calculate it.
+    // Do not show an original price when it is not actually above the current price.
+    const originalPrice =
+        typeof propOriginalPrice === "number" && propOriginalPrice > 0
+            ? propOriginalPrice
+            : getOriginalPrice(price, discountRate);
 
-    if (!originalPrice) {
+    if (originalPrice === null || originalPrice <= price) {
         return (
             <PriceDisplay
                 price={price}

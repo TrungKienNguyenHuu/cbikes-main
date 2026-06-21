@@ -10,6 +10,7 @@ import { ShoppingCart } from "./components/shoppingCart/ShoppingCart";
 import { ProductDetail } from "./components/header/ProductDetail";
 import { ProductDetailCopy } from "./components/header/ProductDetail_copy";
 import { PriceComparison } from "./components/priceComparison/PriceComparison";
+import { HotProducts } from "./components/hotProducts/HotProducts";
 import { useFilter } from "./hooks/filter.hook";
 import { useShoppingCart } from "./hooks/shoppingCart.hook";
 import { useFavorites } from "./hooks/favorites.hook";
@@ -32,6 +33,17 @@ const AppContainer = styled.div`
   @media (max-width: 768px) {
     flex-direction: column;
     padding: 1rem;
+  }
+`;
+
+const HotProductsContainer = styled.div`
+  width: 100%;
+  max-width: min(100%, 1800px);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+
+  @media (max-width: 768px) {
+    padding: 0 1rem;
   }
 `;
 
@@ -173,6 +185,9 @@ const AppContent = () => {
                       onSearch={handleSearch}
                     />
                     <HeroSection />
+                    <HotProductsContainer>
+                      <HotProducts days={7} limit={12} />
+                    </HotProductsContainer>
                     <AppContainer>
                       <Filter>
                         <FilterSection>

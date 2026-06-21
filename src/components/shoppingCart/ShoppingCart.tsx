@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { DiscountedPriceDisplay } from "../common/DiscountedPriceDisplay";
 import { COLORS, IMG_PATH } from "../../common/constants";
 import { Bike } from "../../common/types";
-import { getLowestPrice, getLowestPriceDiscount } from "../../utils/sellerPricing";
+import { getLowestPrice, getLowestPriceDiscount, getLowestPriceOriginal } from "../../utils/sellerPricing";
 import { useToast } from "../../context/ToastContext";
 import {
   StyledCartImg,
@@ -37,6 +37,7 @@ const ShoppingItem = memo(({ bike, removeBikeFromCart }: IShoppingItem) => {
 
   const lowestPrice = getLowestPrice(bike.sellers, bike.price);
   const lowestPriceDiscount = getLowestPriceDiscount(bike.sellers);
+  const lowestPriceOriginal = getLowestPriceOriginal(bike.sellers, bike.price);
 
   return (
     <StyledCartItem>
@@ -45,6 +46,7 @@ const ShoppingItem = memo(({ bike, removeBikeFromCart }: IShoppingItem) => {
         <DiscountedPriceDisplay
           price={lowestPrice}
           discountRate={lowestPriceDiscount}
+          originalPrice={lowestPriceOriginal ?? undefined}
           size="sm"
           color={COLORS.primary}
           layout="vertical"
