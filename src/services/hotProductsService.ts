@@ -73,13 +73,19 @@ export const fetchHotProducts = async (
   limit: number = 10
 ): Promise<Bike[]> => {
   try {
-    const apiURL = process.env.REACT_APP_API_URL;
-    const url = new URL(`${apiURL}/clicks/trending`);
-    url.searchParams.append("days", days.toString());
-    url.searchParams.append("limit", limit.toString());
+    const apiURL = process.env.REACT_APP_API_URL || "";
+    
+    // 1. Build the query string safely without using the strict URL constructor
+    const queryParams = new URLSearchParams({
+      days: days.toString(),
+      limit: limit.toString()
+    }).toString();
 
-    console.log("📡 Fetching hot products from:", url.toString());
-    const response = await fetch(url.toString());
+    // 2. Use the same string interpolation format that works in bikeService.ts
+    const urlString = `${apiURL}/clicks/trending?${queryParams}`;
+
+    console.log("📡 Fetching hot products from:", urlString);
+    const response = await fetch(urlString);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch hot products: ${response.statusText}`);
