@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 // NEW: Added useRef to the React imports
 import { useEffect, useState, useRef } from "react";
+import DOMPurify from "dompurify";
 import { Bike } from "../../common/types";
 import { fetchBikeByIdFromAPI } from "../../services/bikeService";
 import { recordProductClick } from "../../services/hotProductsService";
@@ -633,7 +634,7 @@ export const ProductDetail = ({ addBikeToCart }: ProductDetailProps) => {
                   return (
                       <div
                           dangerouslySetInnerHTML={{
-                            __html: htmlContent,
+                            __html: DOMPurify.sanitize(htmlContent),
                           }}
                       />
                   );

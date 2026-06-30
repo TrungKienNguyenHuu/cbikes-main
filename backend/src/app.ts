@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import productsRoutes from "./routes/products";
 import listingsRoutes from "./routes/listings";
 import clicksRoutes from "./routes/clicks";
@@ -12,8 +14,35 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // Middleware
-app.use(cors());
+app.use(helmet());
+const allowedOrigins = ["http://localhost:3000", "http://127.0.0.1:3000"];
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
+app.use(cors({
+  origin: function (origin, callback) {
+    const isDev = process.env.NODE_ENV !== "production";
+    // Allow if no origin (like Postman), if explicitly allowed, or if in development
+    if (!origin || allowedOrigins.includes(origin) || isDev) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 app.use(express.json());
+
+// Rate limiting (only apply in production or increase limit for local dev)
+const isDev = process.env.NODE_ENV !== "production";
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: isDev ? 10000 : 100, // Limit each IP to 10,000 requests in dev, 100 in prod
+  message: "Too many requests from this IP, please try again later."
+});
+app.use("/", apiLimiter);
 
 app.use((req, res, next) => {
   console.log("PATH:", req.path);

@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const helmet_1 = __importDefault(require("helmet"));
+const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const products_1 = __importDefault(require("./routes/products"));
 const listings_1 = __importDefault(require("./routes/listings"));
 const clicks_1 = __importDefault(require("./routes/clicks"));
@@ -14,8 +16,34 @@ dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5001;
 // Middleware
-app.use((0, cors_1.default)());
+app.use((0, helmet_1.default)());
+const allowedOrigins = ["http://localhost:3000", "http://127.0.0.1:3000"];
+if (process.env.FRONTEND_URL) {
+    allowedOrigins.push(process.env.FRONTEND_URL);
+}
+app.use((0, cors_1.default)({
+    origin: function (origin, callback) {
+        const isDev = process.env.NODE_ENV !== "production";
+        // Allow if no origin (like Postman), if explicitly allowed, or if in development
+        if (!origin || allowedOrigins.includes(origin) || isDev) {
+            callback(null, true);
+        }
+        else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+}));
 app.use(express_1.default.json());
+// Rate limiting (only apply in production or increase limit for local dev)
+const isDev = process.env.NODE_ENV !== "production";
+const apiLimiter = (0, express_rate_limit_1.default)({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: isDev ? 10000 : 100, // Limit each IP to 10,000 requests in dev, 100 in prod
+    message: "Too many requests from this IP, please try again later."
+});
+app.use("/", apiLimiter);
 app.use((req, res, next) => {
     console.log("PATH:", req.path);
     console.log("URL:", req.url);

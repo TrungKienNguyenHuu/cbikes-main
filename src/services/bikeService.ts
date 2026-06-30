@@ -72,6 +72,21 @@ const normalizeCategory = (raw?: string | null): string => {
 };
 
 /**
+ * Parse a price value that could be a number or a string.
+ */
+const parsePrice = (price: string | number | undefined): number => {
+  if (typeof price === 'number') {
+    return price;
+  }
+  if (typeof price === 'string') {
+    const cleaned = price.replace(/[^\d]/g, "");
+    const parsed = parseInt(cleaned, 10);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+  return 0;
+};
+
+/**
  * Transform backend API response to frontend Bike format
  */
 const transformBikeFromAPI = (apiBike: BikeFromAPI): Bike => {
