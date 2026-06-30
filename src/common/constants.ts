@@ -94,7 +94,6 @@ export const BIKE_NEEDS_OPTIONS = [
   { id: "all", name: "All Needs" },
   { id: "students", name: "🎓 Students" },
   { id: "office", name: "💼 Office Workers" },
-  { id: "tech", name: "🚀 Tech Enthusiasts" },
   { id: "delivery", name: "📦 Delivery/Shippers" },
 ];
 

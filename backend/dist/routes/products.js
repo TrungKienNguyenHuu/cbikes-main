@@ -66,13 +66,6 @@ const classifyNeed = (specs = {}, name = "") => {
         productName.includes("truck")) {
         return "delivery";
     }
-    if (batteryCapacity.includes("ai") ||
-        batteryCapacity.includes("smart") ||
-        specs.hasSmartFeatures ||
-        specs.hasGPS ||
-        specs.hasApp) {
-        return "tech";
-    }
     if (range >= 100 && maxSpeed <= 40 && motorPower <= 2000) {
         return "office";
     }
@@ -164,15 +157,10 @@ router.get("/", async (req, res) => {
                 OR (NULLIF(regexp_replace(p.specifications->>'maxSpeed', '\\D', '', 'g'), '')::numeric > 60)
                 OR (p.name ILIKE '%cargo%') OR (p.name ILIKE '%delivery%') OR (p.name ILIKE '%truck%')
               THEN 'delivery'
-              WHEN (p.specifications->>'batteryCapacity' ILIKE '%ai%')
-                OR (p.specifications->>'batteryCapacity' ILIKE '%smart%')
-                OR ((p.specifications->>'hasSmartFeatures')::boolean IS TRUE)
-                OR ((p.specifications->>'hasGPS')::boolean IS TRUE)
-                OR ((p.specifications->>'hasApp')::boolean IS TRUE)
-              THEN 'tech'
-              WHEN (NULLIF(regexp_replace(p.specifications->>'range', '\\D', '', 'g'), '')::numeric >= 100)
-                AND (NULLIF(regexp_replace(p.specifications->>'maxSpeed', '\\D', '', 'g'), '')::numeric <= 40)
-                AND (NULLIF(regexp_replace(p.specifications->>'motorPower', '\\D', '', 'g'), '')::numeric <= 2000)
+
+              WHEN (COALESCE(NULLIF(regexp_replace(p.specifications->>'range', '\\D', '', 'g'), ''), '0')::numeric >= 100)
+                AND (COALESCE(NULLIF(regexp_replace(p.specifications->>'maxSpeed', '\\D', '', 'g'), ''), '0')::numeric <= 40)
+                AND (COALESCE(NULLIF(regexp_replace(p.specifications->>'motorPower', '\\D', '', 'g'), ''), '0')::numeric <= 2000)
               THEN 'office'
               ELSE 'students'
             END = $6
