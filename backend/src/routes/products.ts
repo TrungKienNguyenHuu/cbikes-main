@@ -254,14 +254,21 @@ router.get("/", async (req: Request, res: Response) => {
               'first_seen', pl.first_seen,
               'last_updated', pl.last_updated,
               'discount_rate', pl.discount_rate,
-              'clicks/trending?days=7&limit=12promotions', pl.promotions,
+              'promotions', pl.promotions,
               'platform', json_build_object(
                 'platform_id', plat.platform_id,
                 'name', plat.name,
                 'slug', plat.slug,
                 'logo_url', plat.logo_url,
                 'is_marketplace', plat.is_marketplace
-              )
+              ),
+              'priceHistory', COALESCE((
+                SELECT json_agg(
+                  json_build_object('date', ph.recorded_at::date, 'price', ph.price) ORDER BY ph.recorded_at
+                )
+                FROM price_history ph
+                WHERE ph.listing_id = pl.listing_id
+              ), '[]'::json)
             ) ORDER BY pl.price ASC
           )
           FROM product_listings pl
@@ -291,6 +298,8 @@ router.get("/", async (req: Request, res: Response) => {
       const specs = row.specifications || {};
       specs.tier = classifyTier(lowestPrice);
       specs.need = classifyNeed(specs, row.name);
+      
+      const priceHistory = aggregatePriceHistory(listings);
 
       return {
         product_id: row.product_id,
@@ -311,7 +320,8 @@ router.get("/", async (req: Request, res: Response) => {
         } : undefined,
         listings: listings,
         sellers: sellers,
-        lowest_price: lowestPrice
+        lowest_price: lowestPrice,
+        price_history: priceHistory
       };
     });
 
