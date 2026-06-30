@@ -302,6 +302,7 @@ export const HotProducts: React.FC<HotProductsProps> = ({
                                         discountRate={lowestPriceDiscount}
                                         originalPrice={lowestPriceOriginal ?? undefined}
                                         size="md"
+                                        originalSize="md"
                                         color={COLORS.primary}
                                         layout="vertical"
                                         align="start"

@@ -4,7 +4,32 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="28e2b920-4343-40b7-8f21-0104008a97b4" name="Changes" comment="" />
+    <list default="true" id="28e2b920-4343-40b7-8f21-0104008a97b4" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.vscode/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/.vscode/settings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Crawler/Data_cleanning/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Crawler/Data_cleanning/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Crawler/Main_Crawler/crawl_phoxedien.py" beforeDir="false" afterPath="$PROJECT_DIR$/Crawler/Main_Crawler/crawl_phoxedien.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Crawler/Main_Crawler/crawl_xedienvietthanh.py" beforeDir="false" afterPath="$PROJECT_DIR$/Crawler/Main_Crawler/crawl_xedienvietthanh.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/dist/config/database.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/dist/config/database.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/dist/config/database.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/backend/dist/config/database.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/dist/routes/products.d.ts.map" beforeDir="false" afterPath="$PROJECT_DIR$/backend/dist/routes/products.d.ts.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/dist/routes/products.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/dist/routes/products.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/dist/routes/products.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/backend/dist/routes/products.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/dist/types/index.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend/dist/types/index.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/config/database.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/config/database.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/routes/products.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/routes/products.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/common/DiscountedPriceDisplay.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/common/DiscountedPriceDisplay.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/header/ProductDetail_copy.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/hotProducts/HotProducts.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/hotProducts/HotProducts.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hooks/favorites.hook.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/favorites.hook.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hooks/filter.hook.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/filter.hook.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/bikeService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/bikeService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/productService.ts" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -141,6 +166,10 @@
       <workItem from="1781737253532" duration="459000" />
       <workItem from="1782002394302" duration="2396000" />
       <workItem from="1782012747628" duration="2096000" />
+      <workItem from="1782357886545" duration="524000" />
+      <workItem from="1782741090096" duration="3406000" />
+      <workItem from="1782746760495" duration="1181000" />
+      <workItem from="1782749057972" duration="3852000" />
     </task>
     <servers />
   </component>

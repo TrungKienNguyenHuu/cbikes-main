@@ -2,6 +2,7 @@ import styled from "styled-components";
 import { PriceDisplay } from "./PriceDisplay";
 import { getOriginalPrice } from "../../utils/sellerPricing";
 
+
 type PriceSize = "sm" | "md" | "lg" | "xl";
 
 interface DiscountedPriceDisplayProps {
@@ -9,6 +10,7 @@ interface DiscountedPriceDisplayProps {
     discountRate: number;
     originalPrice?: number;
     size?: PriceSize;
+    originalSize?: PriceSize;
     color?: string;
     originalColor?: string;
     layout?: "horizontal" | "vertical";
@@ -49,6 +51,7 @@ export const DiscountedPriceDisplay = ({
                                            discountRate,
                                            originalPrice: propOriginalPrice,
                                            size = "md",
+                                           originalSize = "sm",
                                            color,
                                            originalColor = "#000000",
                                            layout = "horizontal", // Defaults to side-by-side (Product Details Page)
@@ -80,7 +83,7 @@ export const DiscountedPriceDisplay = ({
             <PriceDisplay price={price} size={size} color={color} />
             <PriceDisplay
                 price={originalPrice}
-                size="sm"
+                size={originalSize}
                 color={originalColor}
                 strikethrough
             />

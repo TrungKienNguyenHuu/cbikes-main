@@ -8,7 +8,7 @@ import { BrandFilterDropdown } from "./components/filter/BrandFilterDropdown";
 import { PriceControl } from "./components/priceControl/PriceControl";
 import { ShoppingCart } from "./components/shoppingCart/ShoppingCart";
 import { ProductDetail } from "./components/header/ProductDetail";
-import { ProductDetailCopy } from "./components/header/ProductDetail_copy";
+
 import { PriceComparison } from "./components/priceComparison/PriceComparison";
 import { HotProducts } from "./components/hotProducts/HotProducts";
 import { useFilter } from "./hooks/filter.hook";
@@ -299,20 +299,7 @@ const AppContent = () => {
                   </>
                 }
               />
-              <Route
-                path="/test/product/:productId"
-                element={
-                  <>
-                    <Header
-                      title={WEB_APP_NAME}
-                      favorites={favorites}
-                      searchTerm={searchTerm}
-                      onSearch={handleSearch}
-                    />
-                    <ProductDetailCopy />
-                  </>
-                }
-              />
+
               <Route
                 path="/comparison"
                 element={

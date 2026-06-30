@@ -1,10 +1,31 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { Bike } from "../common/types";
 import { useToast } from "../context/ToastContext";
 
+const FAVORITES_STORAGE_KEY = "user_favorites_list";
+
 export const useFavorites = () => {
-  const [favorites, setFavorites] = useState<Bike[]>([]);
   const { addToast } = useToast();
+
+  // 1. Initialize state by checking localStorage first
+  const [favorites, setFavorites] = useState<Bike[]>(() => {
+    try {
+      const savedFavorites = localStorage.getItem(FAVORITES_STORAGE_KEY);
+      return savedFavorites ? JSON.parse(savedFavorites) : [];
+    } catch (error) {
+      console.error("Error loading favorites from localStorage:", error);
+      return [];
+    }
+  });
+
+  // 2. Automatically save to localStorage whenever the favorites array changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
+    } catch (error) {
+      console.error("Error saving favorites to localStorage:", error);
+    }
+  }, [favorites]);
 
   const isFavorite = useCallback(
     (bikeId: string) => favorites.some((bike) => bike.id === bikeId),

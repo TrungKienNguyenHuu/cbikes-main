@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_MAX_PRICE, DEFAULT_MIN_PRICE, PRICE_RANGE_PRESETS } from "../common/constants";
-import { Bike, CategoryAll, FilterState } from "../common/types";
-import { fetchBikesFromAPI } from "../services/bikeService";
-import { useSorting, SortType } from "./sorting.hook";
-import { useSearch } from "./search.hook";
+import { Bike, FilterState } from "../common/types";
+import { fetchBikesFromAPI, fetchMetadataFromAPI } from "../services/bikeService";
+import { recordProductClick } from "../services/hotProductsService";
+import { getOrCreateSessionId } from "../utils/session";
+import { SortType } from "./sorting.hook";
 
 export const useFilter = () => {
   const [filterState, setFilterState] = useState<FilterState>({
@@ -17,23 +18,64 @@ export const useFilter = () => {
   });
 
   const [bikesList, setBikesList] = useState<Bike[]>([]);
+  const [dynamicCategories, setDynamicCategories] = useState<{id: string, name: string}[]>([]);
+  const [dynamicSellers, setDynamicSellers] = useState<{id: string, name: string}[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortType, setSortType] = useState<SortType>("updated-asc");
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  
+  const searchSessionId = useMemo(() => getOrCreateSessionId(), []);
+  const lastRecordedSearchTerm = useRef("");
+  
+  // Track previous values for instant pagination
+  const prevPageRef = useRef(currentPage);
+  const prevSortRef = useRef(sortType);
+  const prevItemsRef = useRef(itemsPerPage);
 
-  // Fetch bikes from API on component mount
+  // Load metadata (categories and sellers) on mount
+  useEffect(() => {
+    const loadMetadata = async () => {
+      try {
+        const data = await fetchMetadataFromAPI();
+        setDynamicCategories(data.dynamicCategories || []);
+        setDynamicSellers(data.dynamicSellers || []);
+      } catch (err) {
+        console.error("Failed to load metadata", err);
+      }
+    };
+    loadMetadata();
+  }, []);
+
+  // Fetch bikes from API whenever filters, pagination, or sorting changes
   useEffect(() => {
     const loadBikes = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        const bikes = await fetchBikesFromAPI();
-        console.log("✓ Bikes fetched from API:", bikes);
-        console.log("✓ Number of bikes:", bikes.length);
+        
+        const params: Record<string, any> = {
+          page: currentPage,
+          limit: itemsPerPage,
+          sort: sortType,
+        };
+
+        if (searchTerm) params.search = searchTerm;
+        if (filterState.currentCategory !== "all") params.category = filterState.currentCategory;
+        if (filterState.currentSeller !== "all") params.seller = filterState.currentSeller;
+        if (filterState.currentNeed !== "all") params.need = filterState.currentNeed;
+        if (filterState.currentTier !== "all") params.tier = filterState.currentTier;
+        
+        if (filterState.minPrice > DEFAULT_MIN_PRICE) params.minPrice = filterState.minPrice;
+        if (filterState.maxPrice < DEFAULT_MAX_PRICE) params.maxPrice = filterState.maxPrice;
+
+        const { bikes, totalPages: fetchedTotalPages } = await fetchBikesFromAPI(params);
+        
         setBikesList(bikes);
+        setTotalPages(fetchedTotalPages);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Failed to load bikes";
         setError(errorMessage);
@@ -43,127 +85,70 @@ export const useFilter = () => {
       }
     };
 
-    loadBikes();
+    const isInstant =
+      prevPageRef.current !== currentPage ||
+      prevSortRef.current !== sortType ||
+      prevItemsRef.current !== itemsPerPage;
+
+    prevPageRef.current = currentPage;
+    prevSortRef.current = sortType;
+    prevItemsRef.current = itemsPerPage;
+
+    // Debounce search/filters, but fetch instantly for pagination/sorting
+    const timer = setTimeout(loadBikes, isInstant ? 0 : 300);
+    return () => clearTimeout(timer);
+  }, [
+    currentPage, itemsPerPage, sortType, searchTerm, 
+    filterState.currentCategory, filterState.currentSeller, 
+    filterState.currentNeed, filterState.currentTier, 
+    filterState.minPrice, filterState.maxPrice
+  ]);
+
+  // Record search-driven impressions on matched bikes
+  useEffect(() => {
+    if (!searchTerm.trim() || searchTerm === lastRecordedSearchTerm.current) {
+      return;
+    }
+
+    if (isLoading) {
+      return; // Wait until loading finishes to record the actual matched bikes
+    }
+
+    lastRecordedSearchTerm.current = searchTerm;
+
+    const matchingBikeIds = bikesList.map((bike) => bike.id);
+
+    if (matchingBikeIds.length === 0) {
+      return;
+    }
+
+    Promise.all(
+      matchingBikeIds.map((bikeId) => recordProductClick(bikeId, searchSessionId))
+    ).catch((err) => {
+      console.warn("Failed to record search-driven product views:", err);
+    });
+  }, [searchTerm, bikesList, isLoading, searchSessionId]);
+
+  // Handle filter changes
+  const handleCurrentCategory = useCallback((categoryId: string) => {
+    setFilterState((prev) => ({ ...prev, currentCategory: categoryId }));
+    setCurrentPage(1);
   }, []);
 
-  // Dynamically count distinct brands from the raw bikes list
-  const dynamicCategories = useMemo(() => {
-    const allBrands = bikesList.map((bike) => bike.category);
+  const handleCurrentSeller = useCallback((sellerId: string) => {
+    setFilterState((prev) => ({ ...prev, currentSeller: sellerId }));
+    setCurrentPage(1);
+  }, []);
 
-    const distinctBrands = Array.from(
-        new Set(allBrands.filter((brand) => brand && brand !== "all"))
-    );
+  const handleCurrentNeed = useCallback((needId: string) => {
+    setFilterState((prev) => ({ ...prev, currentNeed: needId }));
+    setCurrentPage(1);
+  }, []);
 
-    return distinctBrands.map((brand) => ({
-      id: brand,
-      name: brand.charAt(0).toUpperCase() + brand.slice(1),
-    }));
-  }, [bikesList]);
-
-  // 👇 NEW: Dynamically count distinct sellers from the raw bikes list 👇
-  const dynamicSellers = useMemo(() => {
-    // Flatten all seller names into a single array
-    const allSellers = bikesList.flatMap((bike) =>
-        bike.sellers ? bike.sellers.map((s) => s.name) : []
-    );
-
-    // Remove duplicates and empties
-    const distinctSellers = Array.from(
-        new Set(allSellers.filter((seller) => seller && seller !== "all"))
-    );
-
-    // Format for the buttons
-    return distinctSellers.map((seller) => ({
-      id: seller,
-      name: seller,
-    }));
-  }, [bikesList]);
-
-  // Apply search
-  const searchedBikes = useSearch(bikesList, searchTerm);
-
-  // Apply sorting
-  const sortedBikes = useSorting(searchedBikes, sortType);
-
-  // Apply filtering
-  const filteredBikesList = useMemo(
-      () =>
-          sortedBikes.filter((bike) => {
-            const matchesPrice =
-                bike.price >= filterState.minPrice &&
-                bike.price <= filterState.maxPrice;
-
-            const matchesCategory =
-                filterState.currentCategory === "all" ||
-                bike.category.toLowerCase() === filterState.currentCategory.toLowerCase();
-
-            const matchesSeller =
-                filterState.currentSeller === "all" ||
-                (bike.sellers && bike.sellers.some(
-                    (s) => s.name.toLowerCase() === filterState.currentSeller.toLowerCase()
-                ));
-
-            // Check need filter (phân loại theo nhu cầu)
-            const matchesNeed =
-                filterState.currentNeed === "all" || 
-                !filterState.currentNeed ||
-                (bike.specifications && 
-                 bike.specifications.need && 
-                 bike.specifications.need.toLowerCase() === filterState.currentNeed?.toLowerCase());
-
-            // Check tier filter (phân loại theo phân khúc)
-            const matchesTier =
-                filterState.currentTier === "all" || 
-                !filterState.currentTier ||
-                (bike.specifications && 
-                 bike.specifications.tier && 
-                 bike.specifications.tier.toLowerCase() === filterState.currentTier?.toLowerCase());
-
-            return matchesPrice && matchesCategory && matchesSeller && matchesNeed && matchesTier;
-          }),
-      [filterState.currentCategory, filterState.minPrice, filterState.maxPrice, filterState.currentSeller, filterState.currentNeed, filterState.currentTier, sortedBikes]
-  );
-
-  // Pagination
-  const totalPages = Math.ceil(filteredBikesList.length / itemsPerPage);
-  const paginatedBikes = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return filteredBikesList.slice(startIndex, endIndex);
-  }, [filteredBikesList, currentPage, itemsPerPage]);
-
-  const handleCurrentCategory = useCallback(
-      (categoryId: string) => {
-        setFilterState((prev) => ({ ...prev, currentCategory: categoryId }));
-        setCurrentPage(1); // Reset to first page when category changes
-      },
-      []
-  );
-
-  // 👇 NEW: Handle seller selection changes 👇
-  const handleCurrentSeller = useCallback(
-      (sellerId: string) => {
-        setFilterState((prev) => ({ ...prev, currentSeller: sellerId }));
-        setCurrentPage(1); // Reset to first page when seller changes
-      },
-      []
-  );
-
-  const handleCurrentNeed = useCallback(
-      (needId: string) => {
-        setFilterState((prev) => ({ ...prev, currentNeed: needId }));
-        setCurrentPage(1); // Reset to first page when need changes
-      },
-      []
-  );
-
-  const handleCurrentTier = useCallback(
-      (tierId: string) => {
-        setFilterState((prev) => ({ ...prev, currentTier: tierId }));
-        setCurrentPage(1); // Reset to first page when tier changes
-      },
-      []
-  );
+  const handleCurrentTier = useCallback((tierId: string) => {
+    setFilterState((prev) => ({ ...prev, currentTier: tierId }));
+    setCurrentPage(1);
+  }, []);
 
   const handlePricePreset = useCallback((presetId: string) => {
     if (presetId === "custom") {
@@ -205,17 +190,17 @@ export const useFilter = () => {
 
   const handleSearch = useCallback((term: string) => {
     setSearchTerm(term);
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
   }, []);
 
   const handleSort = useCallback((sort: SortType) => {
     setSortType(sort);
-    setCurrentPage(1); // Reset to first page when sorting changes
+    setCurrentPage(1);
   }, []);
 
   const handleItemsPerPage = useCallback((count: number) => {
     setItemsPerPage(count);
-    setCurrentPage(1); // Reset to first page when items per page changes
+    setCurrentPage(1);
   }, []);
 
   const resetFilters = useCallback(() => {
@@ -235,8 +220,8 @@ export const useFilter = () => {
 
   return {
     filterState,
-    filteredBikesList,
-    paginatedBikes,
+    filteredBikesList: bikesList, // Aliased to not break components using this
+    paginatedBikes: bikesList, // Aliased to not break components using this
     dynamicCategories,
     dynamicSellers,
     handleCurrentCategory,
